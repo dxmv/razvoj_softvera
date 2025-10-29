@@ -26,9 +26,9 @@ public class Indeks {
     @Column(name = "broj_indeksa", nullable = false)
     private Integer brojIndeksa;
 
-//    @ManyToOne
-//    @JoinColumn(name = "studijski_program_id", nullable = false)
-//    private StudijskiProgram studijskiProgram;
+    @ManyToOne
+    @JoinColumn(name = "studijski_program_id", nullable = false)
+    private StudProgram studijskiProgram;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
