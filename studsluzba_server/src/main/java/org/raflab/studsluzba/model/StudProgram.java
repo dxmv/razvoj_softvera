@@ -36,4 +36,6 @@ public class StudProgram {
 
     @Column(nullable = false)
     private String zvanje;
+
+    // TODO: Studijski program sadrži predmete
 }

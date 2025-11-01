@@ -34,4 +34,5 @@ public class Nastavnik {
     @OneToMany(mappedBy = "nastavnik", cascade = CascadeType.ALL)
     private Set<NastavnikZvanje> zvanja = new HashSet<>();
 
+    // TODO:  podaci o obrazovanju (visokoškolske ustanove na kojoj je završio sve nivoe studija)
 }

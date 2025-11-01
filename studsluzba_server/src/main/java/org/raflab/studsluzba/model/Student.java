@@ -91,5 +91,8 @@ public class Student {
     // Indeksi studenta
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<Indeks> indeksi = new HashSet<>();
+
+    // TODO: prosle VSU
+
 }
 
