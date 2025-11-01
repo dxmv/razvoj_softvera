@@ -327,6 +327,13 @@ public class Seeder implements CommandLineRunner {
                 .build();
         vsuRepository.save(etf);
 
+        VSU ftn = VSU.builder()
+                .naziv("Univerzitet u Novom Sadu - Fakultet tehničkih nauka")
+                .mesto("Novi Sad")
+                .drzava("Srbija")
+                .build();
+        vsuRepository.save(ftn);
+
         System.out.println("Kreirano " + vsuRepository.count() + " visokoškolskih ustanova");
 
         // Kreiramo školske godine
@@ -339,6 +346,11 @@ public class Seeder implements CommandLineRunner {
                 .aktivna(false)
                 .build();
         skolskaGodinaRepository.save(skolskaGodina2223);
+
+        SkolskaGodina skolskaGodina2122 = SkolskaGodina.builder()
+                .aktivna(false)
+                .build();
+        skolskaGodinaRepository.save(skolskaGodina2122);
 
         System.out.println("Kreirano " + skolskaGodinaRepository.count() + " školskih godina");
 
@@ -357,6 +369,13 @@ public class Seeder implements CommandLineRunner {
                 .email("jelena.jovanovic@kg.ac.rs")
                 .build();
         nastavnikRepository.save(nastavnicaJelena);
+
+        Nastavnik nastavnikPetar = Nastavnik.builder()
+                .ime("Petar")
+                .prezime("Simic")
+                .email("petar.simic@kg.ac.rs")
+                .build();
+        nastavnikRepository.save(nastavnikPetar);
 
         System.out.println("Kreirano " + nastavnikRepository.count() + " nastavnika");
 
@@ -377,6 +396,14 @@ public class Seeder implements CommandLineRunner {
                 .build();
         nastavnikZvanjeRepository.save(zvanjeJelene);
 
+        NastavnikZvanje zvanjePetra = NastavnikZvanje.builder()
+                .nastavnik(nastavnikPetar)
+                .nazivZvanja(NazivZvanja.ASISTENT)
+                .datumIzbora(LocalDate.of(2022, 3, 10))
+                .uzaNaucnaOblast("Matematika")
+                .build();
+        nastavnikZvanjeRepository.save(zvanjePetra);
+
         System.out.println("Kreirano " + nastavnikZvanjeRepository.count() + " nastavničkih zvanja");
 
         // Povezujemo nastavnike i predmete
@@ -393,6 +420,13 @@ public class Seeder implements CommandLineRunner {
                 .predmet(web)
                 .build();
         nastavnikPredmetRepository.save(webJelena);
+
+        NastavnikPredmet mat1Petar = NastavnikPredmet.builder()
+                .skolskaGodina(skolskaGodina2223)
+                .nastavnik(nastavnikPetar)
+                .predmet(mat1)
+                .build();
+        nastavnikPredmetRepository.save(mat1Petar);
 
         System.out.println("Kreirano " + nastavnikPredmetRepository.count() + " nastavnik-predmet zapisa");
 
@@ -411,6 +445,13 @@ public class Seeder implements CommandLineRunner {
                 .build();
         studentPredmetRepository.save(student2Web);
 
+        StudentPredmet student3Mat1 = StudentPredmet.builder()
+                .skolskaGodina(skolskaGodina2223)
+                .indeks(indeks3b)
+                .nastavnikPredmet(mat1Petar)
+                .build();
+        studentPredmetRepository.save(student3Mat1);
+
         System.out.println("Kreirano " + studentPredmetRepository.count() + " evidencija student-predmet");
 
         // Definišemo predispitne obaveze
@@ -427,6 +468,13 @@ public class Seeder implements CommandLineRunner {
                 .maksimalanBrojPoena(40.0)
                 .build();
         predispitnaObavezaRepository.save(webProjekat);
+
+        PredispitnaObaveza mat1Kolokvijum = PredispitnaObaveza.builder()
+                .nastavnikPredmet(mat1Petar)
+                .vrsta(VrstaPredispitneObaveze.KOLOKVIJUM)
+                .maksimalanBrojPoena(60.0)
+                .build();
+        predispitnaObavezaRepository.save(mat1Kolokvijum);
 
         System.out.println("Kreirano " + predispitnaObavezaRepository.count() + " predispitnih obaveza");
 
@@ -445,6 +493,13 @@ public class Seeder implements CommandLineRunner {
                 .build();
         studentPredispitnaObavezaRepository.save(webProjekatPoeni);
 
+        StudentPredispitnaObaveza mat1KolokvijumPoeni = StudentPredispitnaObaveza.builder()
+                .studentPredmet(student3Mat1)
+                .predispitnaObaveza(mat1Kolokvijum)
+                .osvojeniPoeni(48.0)
+                .build();
+        studentPredispitnaObavezaRepository.save(mat1KolokvijumPoeni);
+
         System.out.println("Kreirano " + studentPredispitnaObavezaRepository.count() + " zapisa o predispitnim obavezama studenata");
 
         // Upis u novu školsku godinu
@@ -458,6 +513,28 @@ public class Seeder implements CommandLineRunner {
         upisStudent1.getPredmeti().add(prog2);
         upisStudent1.getPredmeti().add(bp);
         upisGodineRepository.save(upisStudent1);
+
+        UpisGodine upisStudent2 = UpisGodine.builder()
+                .studentskiIndeks(indeks2)
+                .skolskaGodina(skolskaGodina2324)
+                .godinaStudija(4)
+                .datumUpisa(LocalDate.of(2023, 10, 3))
+                .napomena("Upis u četvrtu godinu studija")
+                .build();
+        upisStudent2.getPredmeti().add(web);
+        upisStudent2.getPredmeti().add(mobile);
+        upisGodineRepository.save(upisStudent2);
+
+        UpisGodine upisStudent3 = UpisGodine.builder()
+                .studentskiIndeks(indeks3b)
+                .skolskaGodina(skolskaGodina2223)
+                .godinaStudija(2)
+                .datumUpisa(LocalDate.of(2022, 10, 1))
+                .napomena("Upis nakon prelaska na RI program")
+                .build();
+        upisStudent3.getPredmeti().add(prog1);
+        upisStudent3.getPredmeti().add(mat1);
+        upisGodineRepository.save(upisStudent3);
 
         System.out.println("Kreirano " + upisGodineRepository.count() + " upisa godine");
 
@@ -473,6 +550,28 @@ public class Seeder implements CommandLineRunner {
         obnovaStudent2.getPredmeti().add(bp);
         obnovaGodineRepository.save(obnovaStudent2);
 
+        ObnovaGodine obnovaStudent1 = ObnovaGodine.builder()
+                .studentskiIndeks(indeks1)
+                .skolskaGodina(skolskaGodina2223)
+                .godinaStudija(1)
+                .datumObnove(LocalDate.of(2022, 9, 29))
+                .napomena("Obnova prve godine zbog nedovoljnih bodova")
+                .build();
+        obnovaStudent1.getPredmeti().add(prog1);
+        obnovaStudent1.getPredmeti().add(mat1);
+        obnovaGodineRepository.save(obnovaStudent1);
+
+        ObnovaGodine obnovaStudent3 = ObnovaGodine.builder()
+                .studentskiIndeks(indeks3b)
+                .skolskaGodina(skolskaGodina2324)
+                .godinaStudija(3)
+                .datumObnove(LocalDate.of(2023, 10, 6))
+                .napomena("Obnova treće godine radi usklađivanja predmeta")
+                .build();
+        obnovaStudent3.getPredmeti().add(bp);
+        obnovaStudent3.getPredmeti().add(web);
+        obnovaGodineRepository.save(obnovaStudent3);
+
         System.out.println("Kreirano " + obnovaGodineRepository.count() + " obnova godine");
 
         // Kreiramo ispitne rokove i ispite
@@ -482,6 +581,20 @@ public class Seeder implements CommandLineRunner {
                 .skolskaGodina(skolskaGodina2324)
                 .build();
         ispitniRokRepository.save(januarRok);
+
+        IspitniRok februarRok = IspitniRok.builder()
+                .datumPocetka(LocalDate.of(2024, 2, 15))
+                .datumZavrsetka(LocalDate.of(2024, 3, 5))
+                .skolskaGodina(skolskaGodina2324)
+                .build();
+        ispitniRokRepository.save(februarRok);
+
+        IspitniRok junRok = IspitniRok.builder()
+                .datumPocetka(LocalDate.of(2023, 6, 10))
+                .datumZavrsetka(LocalDate.of(2023, 7, 1))
+                .skolskaGodina(skolskaGodina2223)
+                .build();
+        ispitniRokRepository.save(junRok);
 
         System.out.println("Kreirano " + ispitniRokRepository.count() + " ispitnih rokova");
 
@@ -494,6 +607,24 @@ public class Seeder implements CommandLineRunner {
                 .build();
         ispitRepository.save(prog1Januar);
 
+        Ispit mat1Februar = Ispit.builder()
+                .datum(LocalDate.of(2024, 2, 22))
+                .predmet(mat1)
+                .nastavnik(nastavnikPetar)
+                .vremePocetka(LocalTime.of(10, 0))
+                .ispitniRok(februarRok)
+                .build();
+        ispitRepository.save(mat1Februar);
+
+        Ispit webJun = Ispit.builder()
+                .datum(LocalDate.of(2023, 6, 21))
+                .predmet(web)
+                .nastavnik(nastavnicaJelena)
+                .vremePocetka(LocalTime.of(12, 0))
+                .ispitniRok(junRok)
+                .build();
+        ispitRepository.save(webJun);
+
         System.out.println("Kreirano " + ispitRepository.count() + " ispita");
 
         // Prijave ispita
@@ -503,6 +634,20 @@ public class Seeder implements CommandLineRunner {
                 .datumPrijave(LocalDateTime.of(2024, 1, 15, 12, 30))
                 .build();
         prijavaIspitaRepository.save(prijavaIspita1);
+
+        PrijavaIspita prijavaIspita2 = PrijavaIspita.builder()
+                .studentskiIndeks(indeks2)
+                .ispit(mat1Februar)
+                .datumPrijave(LocalDateTime.of(2024, 2, 10, 9, 45))
+                .build();
+        prijavaIspitaRepository.save(prijavaIspita2);
+
+        PrijavaIspita prijavaIspita3 = PrijavaIspita.builder()
+                .studentskiIndeks(indeks3b)
+                .ispit(webJun)
+                .datumPrijave(LocalDateTime.of(2023, 6, 5, 14, 15))
+                .build();
+        prijavaIspitaRepository.save(prijavaIspita3);
 
         System.out.println("Kreirano " + prijavaIspitaRepository.count() + " prijava ispita");
 
@@ -516,6 +661,24 @@ public class Seeder implements CommandLineRunner {
                 .build();
         izlazakIspitRepository.save(izlazakProg1);
 
+        IzlazakIspit izlazakMat1 = IzlazakIspit.builder()
+                .prijavaIspita(prijavaIspita2)
+                .poeniSaIspita(38.0)
+                .ukupnoPoena(78.0)
+                .napomena("Stabilan uspeh")
+                .datumIzlaska(LocalDateTime.of(2024, 2, 22, 11, 0))
+                .build();
+        izlazakIspitRepository.save(izlazakMat1);
+
+        IzlazakIspit izlazakWeb = IzlazakIspit.builder()
+                .prijavaIspita(prijavaIspita3)
+                .poeniSaIspita(42.0)
+                .ukupnoPoena(88.0)
+                .napomena("Istaknut projekat")
+                .datumIzlaska(LocalDateTime.of(2023, 6, 21, 13, 45))
+                .build();
+        izlazakIspitRepository.save(izlazakWeb);
+
         System.out.println("Kreirano " + izlazakIspitRepository.count() + " izlazaka na ispit");
 
         // Položeni predmeti
@@ -527,6 +690,25 @@ public class Seeder implements CommandLineRunner {
                 .izlazakNaIspit(izlazakProg1)
                 .build();
         polozenPredmetRepository.save(prog1Polozen);
+
+        PolozenPredmet mat1Polozen = PolozenPredmet.builder()
+                .studentskiIndeks(indeks2)
+                .predmet(mat1)
+                .ocena(8)
+                .nacinPolaganja(NacinPolaganja.ISPIT)
+                .izlazakNaIspit(izlazakMat1)
+                .build();
+        polozenPredmetRepository.save(mat1Polozen);
+
+        PolozenPredmet webPriznat = PolozenPredmet.builder()
+                .studentskiIndeks(indeks3b)
+                .predmet(web)
+                .ocena(9)
+                .nacinPolaganja(NacinPolaganja.PRIZNAVANJE)
+                .visokoskolskaUstanova(ftn)
+                .nazivPredmetaSaDrugeVSU("Advanced Web Development")
+                .build();
+        polozenPredmetRepository.save(webPriznat);
 
         System.out.println("Kreirano " + polozenPredmetRepository.count() + " položenih predmeta");
 
