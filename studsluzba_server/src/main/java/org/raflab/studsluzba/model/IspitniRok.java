@@ -3,7 +3,6 @@ package org.raflab.studsluzba.model;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,8 +25,11 @@ public class IspitniRok {
     @Column(name = "datum_zavrsetka", nullable = false)
     private LocalDate datumZavrsetka;
 
+    @ManyToOne
+    @JoinColumn(name = "skolska_godina_id", nullable = false)
+    private SkolskaGodina skolskaGodina;
+
     @OneToMany(mappedBy = "ispitniRok", cascade = CascadeType.ALL)
     @Builder.Default
     private Set<Ispit> ispiti = new HashSet<>();
 }
-

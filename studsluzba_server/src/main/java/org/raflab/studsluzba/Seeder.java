@@ -5,9 +5,10 @@ import org.raflab.studsluzba.model.*;
 import org.raflab.studsluzba.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Component
@@ -21,6 +22,21 @@ public class Seeder implements CommandLineRunner {
     private final VrstaStudijaRepository vrstaStudijaRepository;
     private final StudProgramRepository studijskiProgramRepository;
     private final PredmetRepository predmetRepository;
+    private final NastavnikRepository nastavnikRepository;
+    private final NastavnikZvanjeRepository nastavnikZvanjeRepository;
+    private final NastavnikPredmetRepository nastavnikPredmetRepository;
+    private final SkolskaGodinaRepository skolskaGodinaRepository;
+    private final StudentPredmetRepository studentPredmetRepository;
+    private final PredispitnaObavezaRepository predispitnaObavezaRepository;
+    private final StudentPredispitnaObavezaRepository studentPredispitnaObavezaRepository;
+    private final IspitniRokRepository ispitniRokRepository;
+    private final IspitRepository ispitRepository;
+    private final PrijavaIspitaRepository prijavaIspitaRepository;
+    private final IzlazakIspitRepository izlazakIspitRepository;
+    private final PolozenPredmetRepository polozenPredmetRepository;
+    private final UpisGodineRepository upisGodineRepository;
+    private final ObnovaGodineRepository obnovaGodineRepository;
+    private final VSURepository vsuRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -295,6 +311,224 @@ public class Seeder implements CommandLineRunner {
         indeksRepository.save(indeks3b);
 
         System.out.println("Kreirano " + indeksRepository.count() + " indeksa");
+
+        // Kreiramo VSU ustanove
+        VSU kgf = VSU.builder()
+                .naziv("Univerzitet u Kragujevcu - Fakultet inženjerskih nauka")
+                .mesto("Kragujevac")
+                .drzava("Srbija")
+                .build();
+        vsuRepository.save(kgf);
+
+        VSU etf = VSU.builder()
+                .naziv("Univerzitet u Beogradu - Elektrotehnički fakultet")
+                .mesto("Beograd")
+                .drzava("Srbija")
+                .build();
+        vsuRepository.save(etf);
+
+        System.out.println("Kreirano " + vsuRepository.count() + " visokoškolskih ustanova");
+
+        // Kreiramo školske godine
+        SkolskaGodina skolskaGodina2324 = SkolskaGodina.builder()
+                .aktivna(true)
+                .build();
+        skolskaGodinaRepository.save(skolskaGodina2324);
+
+        SkolskaGodina skolskaGodina2223 = SkolskaGodina.builder()
+                .aktivna(false)
+                .build();
+        skolskaGodinaRepository.save(skolskaGodina2223);
+
+        System.out.println("Kreirano " + skolskaGodinaRepository.count() + " školskih godina");
+
+        // Kreiramo nastavnike
+        Nastavnik nastavnikMilan = Nastavnik.builder()
+                .ime("Milan")
+                .prezime("Ilic")
+                .srednjeIme("Petrovic")
+                .email("milan.ilic@kg.ac.rs")
+                .build();
+        nastavnikRepository.save(nastavnikMilan);
+
+        Nastavnik nastavnicaJelena = Nastavnik.builder()
+                .ime("Jelena")
+                .prezime("Jovanovic")
+                .email("jelena.jovanovic@kg.ac.rs")
+                .build();
+        nastavnikRepository.save(nastavnicaJelena);
+
+        System.out.println("Kreirano " + nastavnikRepository.count() + " nastavnika");
+
+        // Kreiramo zvanja nastavnika
+        NastavnikZvanje zvanjeMilana = NastavnikZvanje.builder()
+                .nastavnik(nastavnikMilan)
+                .nazivZvanja(NazivZvanja.DOCENT)
+                .datumIzbora(LocalDate.of(2021, 9, 1))
+                .uzaNaucnaOblast("Računarske nauke")
+                .build();
+        nastavnikZvanjeRepository.save(zvanjeMilana);
+
+        NastavnikZvanje zvanjeJelene = NastavnikZvanje.builder()
+                .nastavnik(nastavnicaJelena)
+                .nazivZvanja(NazivZvanja.VANREDNI_PROFESOR)
+                .datumIzbora(LocalDate.of(2018, 6, 15))
+                .uzaNaucnaOblast("Softversko inženjerstvo")
+                .build();
+        nastavnikZvanjeRepository.save(zvanjeJelene);
+
+        System.out.println("Kreirano " + nastavnikZvanjeRepository.count() + " nastavničkih zvanja");
+
+        // Povezujemo nastavnike i predmete
+        NastavnikPredmet prog1Milan = NastavnikPredmet.builder()
+                .skolskaGodina(skolskaGodina2324)
+                .nastavnik(nastavnikMilan)
+                .predmet(prog1)
+                .build();
+        nastavnikPredmetRepository.save(prog1Milan);
+
+        NastavnikPredmet webJelena = NastavnikPredmet.builder()
+                .skolskaGodina(skolskaGodina2324)
+                .nastavnik(nastavnicaJelena)
+                .predmet(web)
+                .build();
+        nastavnikPredmetRepository.save(webJelena);
+
+        System.out.println("Kreirano " + nastavnikPredmetRepository.count() + " nastavnik-predmet zapisa");
+
+        // Evidentiramo studente na predmetima
+        StudentPredmet student1Prog1 = StudentPredmet.builder()
+                .skolskaGodina(skolskaGodina2324)
+                .indeks(indeks1)
+                .nastavnikPredmet(prog1Milan)
+                .build();
+        studentPredmetRepository.save(student1Prog1);
+
+        StudentPredmet student2Web = StudentPredmet.builder()
+                .skolskaGodina(skolskaGodina2324)
+                .indeks(indeks2)
+                .nastavnikPredmet(webJelena)
+                .build();
+        studentPredmetRepository.save(student2Web);
+
+        System.out.println("Kreirano " + studentPredmetRepository.count() + " evidencija student-predmet");
+
+        // Definišemo predispitne obaveze
+        PredispitnaObaveza prog1Kolokvijum = PredispitnaObaveza.builder()
+                .nastavnikPredmet(prog1Milan)
+                .vrsta(VrstaPredispitneObaveze.KOLOKVIJUM)
+                .maksimalanBrojPoena(50.0)
+                .build();
+        predispitnaObavezaRepository.save(prog1Kolokvijum);
+
+        PredispitnaObaveza webProjekat = PredispitnaObaveza.builder()
+                .nastavnikPredmet(webJelena)
+                .vrsta(VrstaPredispitneObaveze.PROJEKAT)
+                .maksimalanBrojPoena(40.0)
+                .build();
+        predispitnaObavezaRepository.save(webProjekat);
+
+        System.out.println("Kreirano " + predispitnaObavezaRepository.count() + " predispitnih obaveza");
+
+        // Beležimo ostvarene predispitne poene
+        StudentPredispitnaObaveza prog1KolokvijumPoeni = StudentPredispitnaObaveza.builder()
+                .studentPredmet(student1Prog1)
+                .predispitnaObaveza(prog1Kolokvijum)
+                .osvojeniPoeni(42.0)
+                .build();
+        studentPredispitnaObavezaRepository.save(prog1KolokvijumPoeni);
+
+        StudentPredispitnaObaveza webProjekatPoeni = StudentPredispitnaObaveza.builder()
+                .studentPredmet(student2Web)
+                .predispitnaObaveza(webProjekat)
+                .osvojeniPoeni(35.0)
+                .build();
+        studentPredispitnaObavezaRepository.save(webProjekatPoeni);
+
+        System.out.println("Kreirano " + studentPredispitnaObavezaRepository.count() + " zapisa o predispitnim obavezama studenata");
+
+        // Upis u novu školsku godinu
+        UpisGodine upisStudent1 = UpisGodine.builder()
+                .studentskiIndeks(indeks1)
+                .skolskaGodina(skolskaGodina2324)
+                .godinaStudija(2)
+                .datumUpisa(LocalDate.of(2023, 10, 2))
+                .napomena("Upis u drugu godinu studija")
+                .build();
+        upisStudent1.getPredmeti().add(prog2);
+        upisStudent1.getPredmeti().add(bp);
+        upisGodineRepository.save(upisStudent1);
+
+        System.out.println("Kreirano " + upisGodineRepository.count() + " upisa godine");
+
+        // Evidentiramo obnovu godine
+        ObnovaGodine obnovaStudent2 = ObnovaGodine.builder()
+                .studentskiIndeks(indeks2)
+                .skolskaGodina(skolskaGodina2324)
+                .godinaStudija(3)
+                .datumObnove(LocalDate.of(2023, 10, 5))
+                .napomena("Obnova treće godine zbog neispunjenih uslova")
+                .build();
+        obnovaStudent2.getPredmeti().add(prog2);
+        obnovaStudent2.getPredmeti().add(bp);
+        obnovaGodineRepository.save(obnovaStudent2);
+
+        System.out.println("Kreirano " + obnovaGodineRepository.count() + " obnova godine");
+
+        // Kreiramo ispitne rokove i ispite
+        IspitniRok januarRok = IspitniRok.builder()
+                .datumPocetka(LocalDate.of(2024, 1, 20))
+                .datumZavrsetka(LocalDate.of(2024, 2, 10))
+                .skolskaGodina(skolskaGodina2324)
+                .build();
+        ispitniRokRepository.save(januarRok);
+
+        System.out.println("Kreirano " + ispitniRokRepository.count() + " ispitnih rokova");
+
+        Ispit prog1Januar = Ispit.builder()
+                .datum(LocalDate.of(2024, 1, 25))
+                .predmet(prog1)
+                .nastavnik(nastavnikMilan)
+                .vremePocetka(LocalTime.of(9, 0))
+                .ispitniRok(januarRok)
+                .build();
+        ispitRepository.save(prog1Januar);
+
+        System.out.println("Kreirano " + ispitRepository.count() + " ispita");
+
+        // Prijave ispita
+        PrijavaIspita prijavaIspita1 = PrijavaIspita.builder()
+                .studentskiIndeks(indeks1)
+                .ispit(prog1Januar)
+                .datumPrijave(LocalDateTime.of(2024, 1, 15, 12, 30))
+                .build();
+        prijavaIspitaRepository.save(prijavaIspita1);
+
+        System.out.println("Kreirano " + prijavaIspitaRepository.count() + " prijava ispita");
+
+        // Izlasci na ispit
+        IzlazakIspit izlazakProg1 = IzlazakIspit.builder()
+                .prijavaIspita(prijavaIspita1)
+                .poeniSaIspita(45.0)
+                .ukupnoPoena(87.0)
+                .napomena("Odličan rezultat")
+                .datumIzlaska(LocalDateTime.of(2024, 1, 25, 11, 30))
+                .build();
+        izlazakIspitRepository.save(izlazakProg1);
+
+        System.out.println("Kreirano " + izlazakIspitRepository.count() + " izlazaka na ispit");
+
+        // Položeni predmeti
+        PolozenPredmet prog1Polozen = PolozenPredmet.builder()
+                .studentskiIndeks(indeks1)
+                .predmet(prog1)
+                .ocena(10)
+                .nacinPolaganja(NacinPolaganja.ISPIT)
+                .izlazakNaIspit(izlazakProg1)
+                .build();
+        polozenPredmetRepository.save(prog1Polozen);
+
+        System.out.println("Kreirano " + polozenPredmetRepository.count() + " položenih predmeta");
 
 
     }
