@@ -2,6 +2,7 @@ package org.raflab.studsluzba.model;
 
 import lombok.*;
 import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,9 +91,9 @@ public class Student {
 
     // Indeksi studenta
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Indeks> indeksi = new HashSet<>();
 
     // TODO: prosle VSU
 
 }
-
