@@ -6,6 +6,7 @@ import org.raflab.studsluzba.model.Student;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.service.StudentService;
 import org.springframework.http.HttpStatus;
@@ -65,8 +66,17 @@ public class StudentController {
         return service.findFailedExamsByIndex(index, pageable);
     }
 
+    // pretraga studenata po imenu i/ili prezimenu
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<StudentDto> search(@RequestParam(required = false) String ime,
+                                   @RequestParam(required = false) String prezime,
+                                   Pageable pageable) {
+        return service.search(ime, prezime, pageable);
+    }
+
     // pregled svih upisanih godina za broj indeksa
-    @GetMapping("/by-index/{index}/enroll")
+    @GetMapping("/by-index/{index}/enrolled")
     @ResponseStatus(HttpStatus.OK)
     public List<UpisGodineDto> findEnrolledYearsByIndex(@PathVariable String index) {
         return service.findEnrolledYearsByIndex(index);
@@ -79,8 +89,11 @@ public class StudentController {
         return service.findRepeatedYearsByIndex(index);
     }
 
-    // selekcija studenata na osnovu imena i/ili prezimena (može samo ime, ili samo prezime ili oba da se unesu), paginirano
-
-    // selekcija svih upisanih studenata koji su završili određenu srednju školu
+    // svi upisani studenti koji su završili određenu srednju školu
+    @GetMapping("/by-high-school")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StudentDto> findEnrolledByHighSchool(@RequestParam Long srednjaSkolaId) {
+        return service.findEnrolledByHighSchool(srednjaSkolaId);
+    }
 
 }

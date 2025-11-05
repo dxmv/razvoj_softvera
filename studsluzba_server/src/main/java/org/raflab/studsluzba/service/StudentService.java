@@ -9,6 +9,7 @@ import org.raflab.studsluzba.model.UpisGodine;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.repositories.*;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class StudentService {
     private final StudentPredmetRepository studentPredmetRepository;
     private final UpisGodineRepository upisGodineRepository;
     private final ObnovaGodineRepository obnovaGodineRepository;
+    private final SrednjasSkolaRepository srednjasSkolaRepository;
 
     public Student create(Student entity) {
         return repository.save(entity);
@@ -72,6 +74,13 @@ public class StudentService {
                 .map(EntityMapper::toDto);
     }
 
+    public Page<StudentDto> search(String ime, String prezime, Pageable pageable) {
+        String normalizedIme = normalize(ime);
+        String normalizedPrezime = normalize(prezime);
+        return repository.searchByImeAndPrezime(normalizedIme, normalizedPrezime, pageable)
+                .map(EntityMapper::toDto);
+    }
+
     public List<UpisGodineDto> findEnrolledYearsByIndex(String index) {
         Indeks indeks = findIndeksOrThrow(index);
         List<UpisGodine> upisi = upisGodineRepository.findByStudentskiIndeks(indeks);
@@ -84,6 +93,15 @@ public class StudentService {
         return obnove.stream().map(EntityMapper::toDto).collect(Collectors.toList());
     }
 
+    public List<StudentDto> findEnrolledByHighSchool(Long srednjaSkolaId) {
+        if (srednjaSkolaId != null && !srednjasSkolaRepository.existsById(srednjaSkolaId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Srednja skola not found: " + srednjaSkolaId);
+        }
+        return repository.findEnrolledByHighSchool(srednjaSkolaId).stream()
+                .map(EntityMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     // pomcna funkcija
     private Indeks findIndeksOrThrow(String index) {
         Indeks indeks = indeksService.findByShort(index);
@@ -93,5 +111,12 @@ public class StudentService {
         return indeks;
     }
 
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
 
 }
