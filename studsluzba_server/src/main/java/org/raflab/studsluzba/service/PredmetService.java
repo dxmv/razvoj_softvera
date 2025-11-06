@@ -47,4 +47,7 @@ public class PredmetService {
                 .findByStudijskiProgramId(studProgramId, pageable)
                 .map(EntityMapper::toDto);
     }
+    public Page<PredmetDto> getAllPredmeti(Pageable pageable) {
+        return repository.findAll(pageable).map(EntityMapper::toDto);
+    }
 }

@@ -45,5 +45,9 @@ public class PredmetController {
     public Page<PredmetDto> findByStudProgram(@RequestParam Long studProgramId, Pageable pageable) {
         return service.findPredmetiByStudijskiProgram(studProgramId,pageable);
     }
-
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Page<PredmetDto> getAllPredmeti(Pageable pageable) {
+        return service.getAllPredmeti(pageable);
+    }
 }
