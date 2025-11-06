@@ -13,5 +13,7 @@ public interface PredmetRepository extends JpaRepository<Predmet, Long> {
     @Query("SELECT p FROM Predmet p WHERE p.studijskiProgram.id = :studProgramId")
     Page<Predmet> findByStudijskiProgramId(@Param("studProgramId") Long studProgramId, Pageable pageable);
 
+    Page<Predmet> findByStudijskiProgram_Id(Long studijskiProgramId, Pageable pageable);
 
+    boolean existsBySifra(String sifra);
 }
