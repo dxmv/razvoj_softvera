@@ -34,4 +34,9 @@ public class IspitController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+    @GetMapping("/{ispitId}/prosecna-ocena")
+    @ResponseStatus(HttpStatus.OK)
+    public Double getProsecnaOcena(@PathVariable Long ispitId) {
+        return service.getProsecnaOcenaNaIspitu(ispitId);
+    }
 }
