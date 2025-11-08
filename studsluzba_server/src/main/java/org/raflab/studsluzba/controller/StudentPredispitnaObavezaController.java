@@ -34,4 +34,12 @@ public class StudentPredispitnaObavezaController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
+    @GetMapping("/predispitni-poeni")
+    @ResponseStatus(HttpStatus.OK)
+    public Double getPredispitniPoeni(@RequestParam Long indeksId,
+                                      @RequestParam Long predmetId,
+                                      @RequestParam Long skolskaGodinaId) {
+        return service.getUkupniPredispitniPoeni(indeksId, predmetId, skolskaGodinaId);
+    }
 }
