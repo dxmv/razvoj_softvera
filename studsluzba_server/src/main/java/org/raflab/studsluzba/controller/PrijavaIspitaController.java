@@ -2,6 +2,7 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.PrijavaIspita;
+import org.raflab.studsluzba.model.dto.PrijavaIspitaDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.service.PrijavaIspitaService;
 import org.springframework.http.HttpStatus;
@@ -42,5 +43,10 @@ public class PrijavaIspitaController {
     @ResponseStatus(HttpStatus.OK)
     public List<StudentDto> getPrijavljeniZaIspit(@PathVariable Long ispitId) {
         return service.findPrijavljeniZaIspit(ispitId);
+    }
+    @PostMapping("/prijavi")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PrijavaIspitaDto prijaviIspit(@RequestBody PrijavaIspitaDto prijavaDto) {
+        return service.prijaviIspit(prijavaDto);
     }
 }
