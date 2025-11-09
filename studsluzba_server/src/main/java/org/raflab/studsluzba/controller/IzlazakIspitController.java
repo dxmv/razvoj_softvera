@@ -2,6 +2,7 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.IzlazakIspit;
+import org.raflab.studsluzba.model.dto.IzlazakIspitDto;
 import org.raflab.studsluzba.service.IzlazakIspitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +34,11 @@ public class IzlazakIspitController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @PostMapping("/dodaj-izlazak")
+    @ResponseStatus(HttpStatus.CREATED)
+    public IzlazakIspitDto dodajIzlazak(@RequestBody IzlazakIspitDto izlazakDto) {
+        return service.dodajIzlazak(izlazakDto);
     }
 }

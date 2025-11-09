@@ -2,6 +2,7 @@ package org.raflab.studsluzba.repositories;
 
 import org.raflab.studsluzba.model.Indeks;
 import org.raflab.studsluzba.model.PolozenPredmet;
+import org.raflab.studsluzba.model.Predmet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,6 @@ public interface PolozenPredmetRepository extends JpaRepository<PolozenPredmet, 
             @Param("predmetId") Long predmetId,
             @Param("godinaOd") int godinaOd,
             @Param("godinaDo") int godinaDo);
+    boolean existsByStudentskiIndeksAndPredmet(Indeks studentskiIndeks, Predmet predmet);
 
 }
