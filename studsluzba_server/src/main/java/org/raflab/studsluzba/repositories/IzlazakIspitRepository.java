@@ -13,5 +13,13 @@ public interface IzlazakIspitRepository extends JpaRepository<IzlazakIspit, Long
             "ORDER BY iz.prijavaIspita.studentskiIndeks.studijskiProgram.oznaka, " +
             "iz.prijavaIspita.studentskiIndeks.godinaUpisa, " +
             "iz.prijavaIspita.studentskiIndeks.brojIndeksa")
+
     List<IzlazakIspit> findRezultatiByIspitSorted(@Param("ispitId") Long ispitId);
+
+    @Query("SELECT COUNT(iz) FROM IzlazakIspit iz " +
+            "JOIN iz.prijavaIspita pi " +
+            "WHERE pi.studentskiIndeks.id = :indeksId " +
+            "AND pi.ispit.predmet.id = :predmetId")
+    Long countByStudentAndPredmet(@Param("indeksId") Long indeksId,
+                                  @Param("predmetId") Long predmetId);
 }

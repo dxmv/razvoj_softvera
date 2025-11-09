@@ -41,4 +41,11 @@ public class IzlazakIspitController {
     public IzlazakIspitDto dodajIzlazak(@RequestBody IzlazakIspitDto izlazakDto) {
         return service.dodajIzlazak(izlazakDto);
     }
+
+    @GetMapping("/broj-izlasaka")
+    @ResponseStatus(HttpStatus.OK)
+    public Long getBrojIzlasakaNaPredmet(@RequestParam Long indeksId,
+                                         @RequestParam Long predmetId) {
+        return service.getBrojIzlasakaNaPredmet(indeksId, predmetId);
+    }
 }

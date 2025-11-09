@@ -22,6 +22,9 @@ public class IzlazakIspitService {
     private final PolozenPredmetRepository polozenPredmetRepository;
     private final PrijavaIspitaRepository prijavaIspitaRepository;
     private final SkolskaGodinaRepository skolskaGodinaRepository;
+    private final StudentskiIndeksRepository studentskiIndeksRepository;
+    private final PredmetRepository predmetRepository;
+
 
     public IzlazakIspit create(IzlazakIspit entity) {
         return repository.save(entity);
@@ -103,5 +106,16 @@ public class IzlazakIspitService {
         else if (ukupnoPoena >= 61) return 7;
         else if (ukupnoPoena >= 51) return 6;
         else return 5;
+    }
+
+    public Long getBrojIzlasakaNaPredmet(Long indeksId, Long predmetId) {
+        if (!studentskiIndeksRepository.existsById(indeksId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Indeks nije pronađen: " + indeksId);
+        }
+        if (!predmetRepository.existsById(predmetId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Predmet nije pronađen: " + predmetId);
+        }
+
+        return repository.countByStudentAndPredmet(indeksId, predmetId);
     }
 }
