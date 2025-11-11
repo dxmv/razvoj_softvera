@@ -306,6 +306,9 @@ public final class EntityMapper {
         }
         return SkolskaGodinaDto.builder()
                 .id(entity.getId())
+                .oznaka(entity.getOznaka())
+                .datumPocetka(entity.getDatumPocetka())
+                .datumZavrsetka(entity.getDatumZavrsetka())
                 .aktivna(entity.getAktivna())
                 .build();
     }

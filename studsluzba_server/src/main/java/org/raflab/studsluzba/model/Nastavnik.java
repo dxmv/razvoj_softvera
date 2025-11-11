@@ -32,7 +32,11 @@ public class Nastavnik {
 
     // Istorija zvanja
     @OneToMany(mappedBy = "nastavnik", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<NastavnikZvanje> zvanja = new HashSet<>();
 
-    // TODO:  podaci o obrazovanju (visokoškolske ustanove na kojoj je završio sve nivoe studija)
+    // Obrazovanje po visokoškolskim ustanovama i nivoima studija
+    @OneToMany(mappedBy = "nastavnik", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<NastavnikObrazovanje> obrazovanje = new HashSet<>();
 }

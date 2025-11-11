@@ -89,11 +89,21 @@ public class Student {
     @Column(name = "uspeh_prijemni")
     private Double uspehPrijemni;
 
+    // Ako je student prešao sa druge visokoškolske ustanove
+    @ManyToOne
+    @JoinColumn(name = "prethodna_vsu_id")
+    private VSU prethodnaVisokoskolskaUstanova;
+
     // Indeksi studenta
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     @JsonIgnore
+    @Builder.Default
     private Set<Indeks> indeksi = new HashSet<>();
 
-    // TODO: prosle VSU
+    // Uplate vezane za studenta
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private Set<Uplata> uplate = new HashSet<>();
 
 }

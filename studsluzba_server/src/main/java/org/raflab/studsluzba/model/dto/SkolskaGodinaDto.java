@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,5 +15,8 @@ import lombok.Setter;
 @Builder
 public class SkolskaGodinaDto {
     private Long id;
+    private String oznaka;
+    private LocalDate datumPocetka;
+    private LocalDate datumZavrsetka;
     private Boolean aktivna;
 }

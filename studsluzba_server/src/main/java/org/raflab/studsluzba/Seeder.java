@@ -338,16 +338,25 @@ public class Seeder implements CommandLineRunner {
 
         // Kreiramo školske godine
         SkolskaGodina skolskaGodina2324 = SkolskaGodina.builder()
+                .oznaka("2023/24")
+                .datumPocetka(LocalDate.of(2023, 10, 1))
+                .datumZavrsetka(LocalDate.of(2024, 9, 30))
                 .aktivna(true)
                 .build();
         skolskaGodinaRepository.save(skolskaGodina2324);
 
         SkolskaGodina skolskaGodina2223 = SkolskaGodina.builder()
+                .oznaka("2022/23")
+                .datumPocetka(LocalDate.of(2022, 10, 1))
+                .datumZavrsetka(LocalDate.of(2023, 9, 30))
                 .aktivna(false)
                 .build();
         skolskaGodinaRepository.save(skolskaGodina2223);
 
         SkolskaGodina skolskaGodina2122 = SkolskaGodina.builder()
+                .oznaka("2021/22")
+                .datumPocetka(LocalDate.of(2021, 10, 1))
+                .datumZavrsetka(LocalDate.of(2022, 9, 30))
                 .aktivna(false)
                 .build();
         skolskaGodinaRepository.save(skolskaGodina2122);
