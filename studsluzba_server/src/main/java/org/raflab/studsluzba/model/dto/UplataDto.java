@@ -14,7 +14,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateUplataRequest {
+public class UplataDto {
+    private Long id;
+    private Long upisGodineId;
     private LocalDate datumUplate;
     private BigDecimal iznosUDinarima;
     private BigDecimal srednjiKurs;

@@ -100,10 +100,4 @@ public class Student {
     @Builder.Default
     private Set<Indeks> indeksi = new HashSet<>();
 
-    // Uplate vezane za studenta
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    @Builder.Default
-    private Set<Uplata> uplate = new HashSet<>();
-
 }

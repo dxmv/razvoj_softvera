@@ -24,8 +24,8 @@ public class Uplata {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "student_id")
-    private Student student;
+    @JoinColumn(name = "upis_godine_id")
+    private UpisGodine upisGodine;
 
     @Column(name = "datum_uplate", nullable = false)
     private LocalDate datumUplate;

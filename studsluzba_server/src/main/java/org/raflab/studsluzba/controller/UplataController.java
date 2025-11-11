@@ -3,6 +3,7 @@ package org.raflab.studsluzba.controller;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Uplata;
 import org.raflab.studsluzba.model.dto.CreateUplataRequest;
+import org.raflab.studsluzba.model.dto.UplataDto;
 import org.raflab.studsluzba.service.UplataService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +22,14 @@ public class UplataController {
     }
 
     @GetMapping("/{id}")
-    public Uplata findById(@PathVariable Long id) {
-        return service.findById(id);
+    public UplataDto findById(@PathVariable Long id) {
+        return service.findDtoById(id);
     }
 
     @PostMapping("/student/{studentId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Uplata createWithCurrentRate(@PathVariable Long studentId,
-                                        @RequestBody CreateUplataRequest request) {
+    public UplataDto createWithCurrentRate(@PathVariable Long studentId,
+                                           @RequestBody CreateUplataRequest request) {
         return service.createWithCurrentRate(studentId, request);
     }
 
