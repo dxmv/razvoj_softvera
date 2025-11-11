@@ -6,18 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NastavnikDto {
+public class NastavnikObrazovanjeDto {
     private Long id;
-    private String ime;
-    private String prezime;
-    private String srednjeIme;
-    private String email;
-    private Set<NastavnikObrazovanjeDto> obrazovanje;
+    private Long nastavnikId;
+    private Long visokaSkolaId;
+    private Long vrstaStudijaId;
+    private Integer godinaZavrsetka;
 }

@@ -36,4 +36,5 @@ public class StudentDto {
     private Long zavrsenaSkolaId;
     private Double uspehSrednjaSkola;
     private Double uspehPrijemni;
+    private Long prethodnaVisokoskolskaUstanovaId;
 }

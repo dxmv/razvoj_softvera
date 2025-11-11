@@ -94,6 +94,9 @@ public final class EntityMapper {
                 .zavrsenaSkolaId(entity.getZavrsenaSkola() != null ? entity.getZavrsenaSkola().getId() : null)
                 .uspehSrednjaSkola(entity.getUspehSrednjaSkola())
                 .uspehPrijemni(entity.getUspehPrijemni())
+                .prethodnaVisokoskolskaUstanovaId(entity.getPrethodnaVisokoskolskaUstanova() != null
+                        ? entity.getPrethodnaVisokoskolskaUstanova().getId()
+                        : null)
                 .build();
     }
 
@@ -123,6 +126,7 @@ public final class EntityMapper {
                 .prezime(entity.getPrezime())
                 .srednjeIme(entity.getSrednjeIme())
                 .email(entity.getEmail())
+                .obrazovanje(mapObrazovanja(entity.getObrazovanje()))
                 .build();
     }
 
@@ -320,5 +324,27 @@ public final class EntityMapper {
         return predmeti.stream()
                 .map(Predmet::getId)
                 .collect(Collectors.toSet());
+    }
+
+    private static Set<NastavnikObrazovanjeDto> mapObrazovanja(Set<NastavnikObrazovanje> obrazovanje) {
+        if (obrazovanje == null || obrazovanje.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return obrazovanje.stream()
+                .map(EntityMapper::toDto)
+                .collect(Collectors.toSet());
+    }
+
+    private static NastavnikObrazovanjeDto toDto(NastavnikObrazovanje entity) {
+        if (entity == null) {
+            return null;
+        }
+        return NastavnikObrazovanjeDto.builder()
+                .id(entity.getId())
+                .nastavnikId(entity.getNastavnik() != null ? entity.getNastavnik().getId() : null)
+                .visokaSkolaId(entity.getVisokaSkola() != null ? entity.getVisokaSkola().getId() : null)
+                .vrstaStudijaId(entity.getVrstaStudija() != null ? entity.getVrstaStudija().getId() : null)
+                .godinaZavrsetka(entity.getGodinaZavrsetka())
+                .build();
     }
 }
