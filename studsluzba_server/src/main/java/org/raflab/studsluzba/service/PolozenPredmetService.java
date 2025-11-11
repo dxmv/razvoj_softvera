@@ -34,4 +34,13 @@ public class PolozenPredmetService {
         }
         repository.deleteById(id);
     }
+    public Double getProsecnaOcenaZaPredmetUGodinama(Long predmetId, int godinaOd, int godinaDo) {
+        Double prosek = repository.findProsecnaOcenaZaPredmetUGodinama(predmetId, godinaOd, godinaDo);
+        if (prosek == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Nema položenih predmeta za dati predmet i period godina.");
+        }
+        return prosek;
+    }
+
 }

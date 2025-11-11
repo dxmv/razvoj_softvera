@@ -18,6 +18,13 @@ public class PolozenPredmetController {
     public PolozenPredmet create(@RequestBody PolozenPredmet body) {
         return service.create(body);
     }
+    @GetMapping("/averageOcena")
+    public Double getProsecnaOcena(
+            @RequestParam Long predmetId,
+            @RequestParam int godinaOd,
+            @RequestParam int godinaDo) {
+        return service.getProsecnaOcenaZaPredmetUGodinama(predmetId, godinaOd, godinaDo);
+    }
 
     @GetMapping("/{id}")
     public PolozenPredmet findById(@PathVariable Long id) {
@@ -34,4 +41,6 @@ public class PolozenPredmetController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
+
 }

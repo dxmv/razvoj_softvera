@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+
+import java.util.Optional;
+
 public interface StudentPredmetRepository extends JpaRepository<StudentPredmet, Long> {
     @Query("SELECT DISTINCT np.predmet FROM StudentPredmet sp " +
             "JOIN sp.nastavnikPredmet np " +
@@ -19,4 +22,12 @@ public interface StudentPredmetRepository extends JpaRepository<StudentPredmet, 
             "      AND pp.predmet = np.predmet" +
             ")")
     Page<Predmet> findUnpassedSubjectsByIndeks(@Param("indeks") Indeks indeks, Pageable pageable);
+
+    @Query("SELECT sp FROM StudentPredmet sp " +
+            "WHERE sp.indeks.id = :indeksId " +
+            "AND sp.nastavnikPredmet.predmet.id = :predmetId " +
+            "AND sp.skolskaGodina.aktivna = true")
+    Optional<StudentPredmet> findByIndeksIdAndNastavnikPredmetPredmetIdAndSkolskaGodinaAktivna(
+            @Param("indeksId") Long indeksId,
+            @Param("predmetId") Long predmetId);
 }
