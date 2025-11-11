@@ -8,6 +8,7 @@ import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
+import org.raflab.studsluzba.model.dto.UpisGodineEnrollmentRequest;
 import org.raflab.studsluzba.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
@@ -80,6 +81,13 @@ public class StudentController {
     @ResponseStatus(HttpStatus.OK)
     public List<UpisGodineDto> findEnrolledYearsByIndex(@PathVariable String index) {
         return service.findEnrolledYearsByIndex(index);
+    }
+
+    @PostMapping("/by-index/{index}/enroll")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UpisGodineDto enroll(@PathVariable String index,
+                                @RequestBody UpisGodineEnrollmentRequest request) {
+        return service.enroll(index, request);
     }
 
     // pregled obnovljenih godina za broj indeksa
