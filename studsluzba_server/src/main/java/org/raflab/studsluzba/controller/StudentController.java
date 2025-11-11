@@ -1,9 +1,9 @@
 package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.model.ObnovaGodine;
 import org.raflab.studsluzba.model.Student;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
+import org.raflab.studsluzba.model.dto.ObnovaGodineRequest;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
@@ -95,6 +95,13 @@ public class StudentController {
     @ResponseStatus(HttpStatus.OK)
     public List<ObnovaGodineDto> findRepeatedYearsByIndex(@PathVariable String index) {
         return service.findRepeatedYearsByIndex(index);
+    }
+
+    @PostMapping("/by-index/{index}/repeat")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ObnovaGodineDto repeatYear(@PathVariable String index,
+                                      @RequestBody ObnovaGodineRequest request) {
+        return service.repeatYear(index, request);
     }
 
     // svi upisani studenti koji su završili određenu srednju školu
