@@ -7,16 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateUplataRequest {
-    private LocalDate datumUplate;
-    private BigDecimal iznosUDinarima;
-    private BigDecimal srednjiKurs;
-    private Long skolskaGodinaId;
+public class RemainingTuitionDto {
+    private BigDecimal preostaloEur;
+    private BigDecimal preostaloRsd;
+    private BigDecimal primenjeniKurs;
 }

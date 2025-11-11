@@ -16,7 +16,8 @@ import java.time.LocalDate;
 @Builder
 public class UplataDto {
     private Long id;
-    private Long upisGodineId;
+    private Long studentId;
+    private Long skolskaGodinaId;
     private LocalDate datumUplate;
     private BigDecimal iznosUDinarima;
     private BigDecimal srednjiKurs;

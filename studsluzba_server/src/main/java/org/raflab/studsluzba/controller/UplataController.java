@@ -3,6 +3,7 @@ package org.raflab.studsluzba.controller;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Uplata;
 import org.raflab.studsluzba.model.dto.CreateUplataRequest;
+import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
 import org.raflab.studsluzba.service.UplataService;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,12 @@ public class UplataController {
     public UplataDto createWithCurrentRate(@PathVariable Long studentId,
                                            @RequestBody CreateUplataRequest request) {
         return service.createWithCurrentRate(studentId, request);
+    }
+
+    @GetMapping("/student/{studentId}/balance")
+    public RemainingTuitionDto remainingTuition(@PathVariable Long studentId,
+                                                @RequestParam Long skolskaGodinaId) {
+        return service.getRemainingTuition(studentId, skolskaGodinaId);
     }
 
     @PutMapping("/{id}")
