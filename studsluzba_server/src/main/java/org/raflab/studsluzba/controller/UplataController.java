@@ -3,6 +3,7 @@ package org.raflab.studsluzba.controller;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Uplata;
 import org.raflab.studsluzba.model.dto.CreateUplataRequest;
+import org.raflab.studsluzba.model.dto.ExchangeRateDto;
 import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
 import org.raflab.studsluzba.service.UplataService;

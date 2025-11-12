@@ -1,10 +1,12 @@
 package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzba.client.ExchangeRateClient;
 import org.raflab.studsluzba.model.SkolskaGodina;
 import org.raflab.studsluzba.model.Student;
 import org.raflab.studsluzba.model.Uplata;
 import org.raflab.studsluzba.model.dto.CreateUplataRequest;
+import org.raflab.studsluzba.model.dto.ExchangeRateDto;
 import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
 import org.raflab.studsluzba.repositories.SkolskaGodinaRepository;
@@ -29,6 +31,7 @@ public class UplataService {
     private final UplataRepository repository;
     private final StudentRepository studentRepository;
     private final SkolskaGodinaRepository skolskaGodinaRepository;
+    private final ExchangeRateClient exchangeRateClient;
 
     public Uplata create(Uplata entity) {
         return repository.save(entity);
@@ -62,9 +65,8 @@ public class UplataService {
         if (request.getIznosUDinarima() == null || request.getIznosUDinarima().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Iznos u dinarima mora biti veći od nule");
         }
-        if (request.getSrednjiKurs() == null || request.getSrednjiKurs().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Srednji kurs mora biti veći od nule");
-        }
+
+        BigDecimal rate = fetchTodayMiddleRate();
 
         // datum uplate je opcionalan
         LocalDate datumUplate = request.getDatumUplate() != null ? request.getDatumUplate() : LocalDate.now();
@@ -74,7 +76,7 @@ public class UplataService {
                 .skolskaGodina(skolskaGodina)
                 .datumUplate(datumUplate)
                 .iznosUDinarima(request.getIznosUDinarima())
-                .srednjiKurs(request.getSrednjiKurs())
+                .srednjiKurs(rate)
                 .build();
 
         Uplata saved = repository.save(uplata);
@@ -91,24 +93,15 @@ public class UplataService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Nema aktivne skolske fodine"));
 
-        // sve uplate ove godine za studenta
-        List<Uplata> uplate = repository.findByStudentIdAndSkolskaGodinaId(student.getId(), skolskaGodina.getId());
-
         // suma svih uplata u evrima
-        BigDecimal paidInEur = uplate.stream()
-                .map(u -> convertToEur(u.getIznosUDinarima(), u.getSrednjiKurs()))
-                .reduce(BigDecimal.ZERO, (prev, current) -> prev.add(current));
+        BigDecimal paidInEur = sumUplataEur(studentId,skolskaGodina.getId());
 
         BigDecimal remainingEur = TUITION_EUR.subtract(paidInEur);
         if (remainingEur.compareTo(BigDecimal.ZERO) < 0) {
             remainingEur = BigDecimal.ZERO;
         }
 
-        // trazimo poslednju uplatu za ovu skolsku godinu i njen srednji kurs
-        BigDecimal appliedRate = uplate.stream()
-                .max(Comparator.comparing(Uplata::getDatumUplate).thenComparing(Uplata::getId))
-                .map(Uplata::getSrednjiKurs)
-                .orElse(BigDecimal.ONE);
+        BigDecimal appliedRate = fetchTodayMiddleRate();
 
         BigDecimal remainingRsd = remainingEur.multiply(appliedRate).setScale(2, RoundingMode.HALF_UP);
 
@@ -117,6 +110,15 @@ public class UplataService {
                 .preostaloRsd(remainingRsd)
                 .primenjeniKurs(appliedRate)
                 .build();
+    }
+
+    private BigDecimal sumUplataEur(Long studentId, Long skolskaGodinaId){
+        // sve uplate ove godine za studenta
+        List<Uplata> uplate = repository.findByStudentIdAndSkolskaGodinaId(studentId,skolskaGodinaId);
+        
+        return uplate.stream()
+                .map(u -> convertToEur(u.getIznosUDinarima(), u.getSrednjiKurs()))
+                .reduce(BigDecimal.ZERO, (prev, current) -> prev.add(current));
     }
 
     private UplataDto toDto(Uplata entity) {
@@ -142,5 +144,19 @@ public class UplataService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Uplata not found: " + id);
         }
         repository.deleteById(id);
+    }
+
+    public ExchangeRateDto getTodayExchangeRate() {
+        return exchangeRateClient.fetchTodayEurRate();
+    }
+
+    private BigDecimal fetchTodayMiddleRate() {
+        ExchangeRateDto rateDto = exchangeRateClient.fetchTodayEurRate();
+        BigDecimal middle = rateDto.getExchangeMiddle();
+        if (middle == null || middle.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Greska sa kursom");
+        }
+        return middle;
     }
 }
