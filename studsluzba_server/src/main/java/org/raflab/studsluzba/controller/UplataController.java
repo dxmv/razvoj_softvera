@@ -35,9 +35,8 @@ public class UplataController {
     }
 
     @GetMapping("/student/{studentId}/balance")
-    public RemainingTuitionDto remainingTuition(@PathVariable Long studentId,
-                                                @RequestParam Long skolskaGodinaId) {
-        return service.getRemainingTuition(studentId, skolskaGodinaId);
+    public RemainingTuitionDto remainingTuition(@PathVariable Long studentId) {
+        return service.getRemainingTuition(studentId);
     }
 
     @PutMapping("/{id}")

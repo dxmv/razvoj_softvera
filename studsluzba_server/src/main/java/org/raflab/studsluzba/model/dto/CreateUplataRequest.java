@@ -18,5 +18,4 @@ public class CreateUplataRequest {
     private LocalDate datumUplate;
     private BigDecimal iznosUDinarima;
     private BigDecimal srednjiKurs;
-    private Long skolskaGodinaId;
 }

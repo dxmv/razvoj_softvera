@@ -55,18 +55,9 @@ public class UplataService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Student not found: " + studentId));
 
-        if (request.getSkolskaGodinaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Skolska godina je obavezna");
-        }
-
-        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findById(request.getSkolskaGodinaId())
+        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findAktivnaSkolskaGodina()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Skolska godina not found: " + request.getSkolskaGodinaId()));
-
-        if (Boolean.FALSE.equals(skolskaGodina.getAktivna())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Skolska godina mora biti aktivna za evidentiranje uplate");
-        }
+                        "Nema aktivne skolske fodine"));
 
         if (request.getIznosUDinarima() == null || request.getIznosUDinarima().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Iznos u dinarima mora biti veći od nule");
@@ -75,6 +66,7 @@ public class UplataService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Srednji kurs mora biti veći od nule");
         }
 
+        // datum uplate je opcionalan
         LocalDate datumUplate = request.getDatumUplate() != null ? request.getDatumUplate() : LocalDate.now();
 
         Uplata uplata = Uplata.builder()
@@ -89,31 +81,30 @@ public class UplataService {
         return toDto(saved);
     }
 
-    public RemainingTuitionDto getRemainingTuition(Long studentId, Long skolskaGodinaId) {
+    public RemainingTuitionDto getRemainingTuition(Long studentId) {
+        // prvo trazimo studenta
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Student not found: " + studentId));
-
-        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findById(skolskaGodinaId)
+        // pa trenutnu aktivnu godinu
+        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findAktivnaSkolskaGodina()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Skolska godina not found: " + skolskaGodinaId));
+                        "Nema aktivne skolske fodine"));
 
-        if (Boolean.FALSE.equals(skolskaGodina.getAktivna())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Skolska godina mora biti aktivna");
-        }
-
+        // sve uplate ove godine za studenta
         List<Uplata> uplate = repository.findByStudentIdAndSkolskaGodinaId(student.getId(), skolskaGodina.getId());
 
+        // suma svih uplata u evrima
         BigDecimal paidInEur = uplate.stream()
                 .map(u -> convertToEur(u.getIznosUDinarima(), u.getSrednjiKurs()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, (prev, current) -> prev.add(current));
 
         BigDecimal remainingEur = TUITION_EUR.subtract(paidInEur);
         if (remainingEur.compareTo(BigDecimal.ZERO) < 0) {
             remainingEur = BigDecimal.ZERO;
         }
 
+        // trazimo poslednju uplatu za ovu skolsku godinu i njen srednji kurs
         BigDecimal appliedRate = uplate.stream()
                 .max(Comparator.comparing(Uplata::getDatumUplate).thenComparing(Uplata::getId))
                 .map(Uplata::getSrednjiKurs)
