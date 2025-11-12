@@ -105,10 +105,10 @@ public class StudentController {
     }
 
     // svi upisani studenti koji su završili određenu srednju školu
-    @GetMapping("/by-high-school")
+    @GetMapping("/by-high-school/{srednjaId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<StudentDto> findEnrolledByHighSchool(@RequestParam Long srednjaSkolaId) {
-        return service.findEnrolledByHighSchool(srednjaSkolaId);
+    public List<StudentDto> findEnrolledByHighSchool(@PathVariable Long srednjaId) {
+        return service.findEnrolledByHighSchool(srednjaId);
     }
 
 }
