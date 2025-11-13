@@ -162,7 +162,6 @@ public class StudentService {
                     "Nema dostupnih predmeta za trazenu godinu studija");
         }
 
-        validateEspbLimit(predmetiZaSlusanje);
         UpisGodine saved = upisGodineRepository.save(upis);
         createStudentPredmeti(indx, skolskaGodina, predmetiZaSlusanje);
         return EntityMapper.toDto(saved);
@@ -181,6 +180,10 @@ public class StudentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "godina je vec upisana");
         }
+        if (request.getPredmetIds() == null || request.getPredmetIds().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Morate navesti bar jedan predmet za obnovu");
+        }
         // napravi novu obnovu
         ObnovaGodine obnova = ObnovaGodine.builder()
         .studentskiIndeks(indx)
@@ -190,11 +193,44 @@ public class StudentService {
         .napomena(request.getNapomena())
         .build();
 
-        // naci sve predmete iz sledece godine i pogledati da li se lista matchuje sa requestom
-        // dodati ih kao nepolozene predmete za studenta
-        // dodati ih u obnovu godine
-        // dodati kao slusa
-        return EntityMapper.toDto(obnova);
+        List<Predmet> nepolozeni = studentPredmetRepository
+                .findUnpassedSubjectsByIndeks(indx, Pageable.unpaged())
+                .getContent();
+        Set<Long> nepolozeniIds = nepolozeni.stream()
+                .map(Predmet::getId)
+                .collect(Collectors.toSet());
+
+        Set<Long> trazeniPredmetIds = request.getPredmetIds();
+        // da li requestujemo polozene predmete
+        List<Long> polozeniRequest = trazeniPredmetIds.stream()
+                .filter(id -> !nepolozeniIds.contains(id))
+                .collect(Collectors.toList());
+        if (!polozeniRequest.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Predmet je vec polozen: " + polozeniRequest.get(0));
+        }
+
+        List<Predmet> izabraniPredmeti = predmetRepository.findAllById(trazeniPredmetIds);
+        if (izabraniPredmeti.size() != trazeniPredmetIds.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Jedan ili vise trazenih predmeta ne postoji");
+        }
+        obnova.setPredmeti(new HashSet<>(izabraniPredmeti));
+
+        List<NastavnikPredmet> nastavniciZaObnovu = nastavnikPredmetRepository
+                .findBySkolskaGodinaIdAndPredmetIdIn(skolskaGodina.getId(), trazeniPredmetIds);
+        Set<Long> pronadjeniPredmeti = nastavniciZaObnovu.stream()
+                .map(np -> np.getPredmet().getId())
+                .collect(Collectors.toSet());
+        if (!pronadjeniPredmeti.containsAll(trazeniPredmetIds)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Odabrani predmeti nisu dostupni u aktivnoj skolskoj godini");
+        }
+
+        validateEspbLimit(nastavniciZaObnovu);
+        ObnovaGodine saved = obnovaGodineRepository.save(obnova);
+        createStudentPredmeti(indx, skolskaGodina, nastavniciZaObnovu);
+        return EntityMapper.toDto(saved);
     }
 
     // pomcna funkcija

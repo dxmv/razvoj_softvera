@@ -11,4 +11,8 @@ public interface NastavnikPredmetRepository extends JpaRepository<NastavnikPredm
             Long skolskaGodinaId,
             Long studijskiProgramId,
             Collection<Integer> semestri);
+
+    List<NastavnikPredmet> findBySkolskaGodinaIdAndPredmetIdIn(
+            Long skolskaGodinaId,
+            Collection<Long> predmetIds);
 }

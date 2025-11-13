@@ -566,7 +566,6 @@ public class Seeder implements CommandLineRunner {
                 .datumObnove(LocalDate.of(2022, 9, 29))
                 .napomena("Obnova prve godine zbog nedovoljnih bodova")
                 .build();
-        obnovaStudent1.getPredmeti().add(prog1);
         obnovaStudent1.getPredmeti().add(mat1);
         obnovaGodineRepository.save(obnovaStudent1);
 
@@ -636,13 +635,6 @@ public class Seeder implements CommandLineRunner {
 
         System.out.println("Kreirano " + ispitRepository.count() + " ispita");
 
-        // Prijave ispita
-        PrijavaIspita prijavaIspita1 = PrijavaIspita.builder()
-                .studentskiIndeks(indeks1)
-                .ispit(prog1Januar)
-                .datumPrijave(LocalDateTime.of(2024, 1, 15, 12, 30))
-                .build();
-        prijavaIspitaRepository.save(prijavaIspita1);
 
         PrijavaIspita prijavaIspita2 = PrijavaIspita.builder()
                 .studentskiIndeks(indeks2)
@@ -661,14 +653,6 @@ public class Seeder implements CommandLineRunner {
         System.out.println("Kreirano " + prijavaIspitaRepository.count() + " prijava ispita");
 
         // Izlasci na ispit
-        IzlazakIspit izlazakProg1 = IzlazakIspit.builder()
-                .prijavaIspita(prijavaIspita1)
-                .poeniSaIspita(45.0)
-                .ukupnoPoena(87.0)
-                .napomena("Odličan rezultat")
-                .datumIzlaska(LocalDateTime.of(2024, 1, 25, 11, 30))
-                .build();
-        izlazakIspitRepository.save(izlazakProg1);
 
         IzlazakIspit izlazakMat1 = IzlazakIspit.builder()
                 .prijavaIspita(prijavaIspita2)
@@ -691,14 +675,6 @@ public class Seeder implements CommandLineRunner {
         System.out.println("Kreirano " + izlazakIspitRepository.count() + " izlazaka na ispit");
 
         // Položeni predmeti
-        PolozenPredmet prog1Polozen = PolozenPredmet.builder()
-                .studentskiIndeks(indeks1)
-                .predmet(prog1)
-                .ocena(10)
-                .nacinPolaganja(NacinPolaganja.ISPIT)
-                .izlazakNaIspit(izlazakProg1)
-                .build();
-        polozenPredmetRepository.save(prog1Polozen);
 
         PolozenPredmet mat1Polozen = PolozenPredmet.builder()
                 .studentskiIndeks(indeks2)
