@@ -14,9 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ObnovaGodineRequest {
-    private Long skolskaGodinaId;
     private Integer godinaStudija;
     private LocalDate datumObnove;
     private String napomena;
-    private Set<Long> nastavnikPredmetIds;
+    private Set<Long> predmetIds;
 }

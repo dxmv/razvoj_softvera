@@ -118,61 +118,83 @@ public class StudentService {
 
     @Transactional
     public UpisGodineDto enroll(String indeksValue, UpisGodineEnrollmentRequest request) {
-        validateEnrollmentRequest(request);
-        Indeks indeks = findIndeksOrThrow(indeksValue);
-        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findById(request.getSkolskaGodinaId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Skolska godina not found: " + request.getSkolskaGodinaId()));
 
-        if (upisGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, skolskaGodina)) {
+        // naci indeks za studenta
+        Indeks indx = findIndeksOrThrow(indeksValue);
+        // naci aktivnu godinu studija
+        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findAktivnaSkolskaGodina()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Nema aktivne skolske fodine"));
+        // da li upis vec postoji
+        if(upisGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indx, skolskaGodina)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Student je već upisan u zadatu školsku godinu");
+                "godina je vec upisana");
+        }
+        // napravi novi upis
+        UpisGodine upis = UpisGodine.builder()
+        .studentskiIndeks(indx)
+        .skolskaGodina(skolskaGodina)
+        .godinaStudija(request.getGodinaStudija())
+        .datumUpisa(request.getDatumUpisa() == null ? LocalDate.now() : request.getDatumUpisa()) //default danas
+        .napomena(request.getNapomena())
+        .build();
+
+        if (request.getGodinaStudija() == null || request.getGodinaStudija() < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Godina studija mora biti pozitivan broj");
         }
 
-        UpisGodine upis = UpisGodine.builder()
-                .studentskiIndeks(indeks)
-                .skolskaGodina(skolskaGodina)
-                .godinaStudija(request.getGodinaStudija())
-                .datumUpisa(request.getDatumUpisa() != null ? request.getDatumUpisa() : LocalDate.now())
-                .napomena(request.getNapomena())
-                .predmeti(fetchPrenetiPredmeti(request.getPrenetiPredmetIds()))
-                .build();
+        // nepolozeni predmeti automatski postaju preneti predmeti
+        List<Predmet> nepolozeni = studentPredmetRepository
+                .findUnpassedSubjectsByIndeks(indx, Pageable.unpaged())
+                .getContent();
+        upis.setPredmeti(new HashSet<>(nepolozeni));
 
+        // predmeti za narednu godinu na osnovu aktivne skolske godine i studijskog programa
+        List<Integer> targetSemesters = resolveSemestersForYear(request.getGodinaStudija());
+        List<NastavnikPredmet> predmetiZaSlusanje = nastavnikPredmetRepository
+                .findBySkolskaGodinaIdAndPredmetStudijskiProgramIdAndPredmetSemestarIn(
+                        skolskaGodina.getId(),
+                        indx.getStudijskiProgram().getId(),
+                        targetSemesters);
+        if (predmetiZaSlusanje.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Nema dostupnih predmeta za trazenu godinu studija");
+        }
+
+        validateEspbLimit(predmetiZaSlusanje);
         UpisGodine saved = upisGodineRepository.save(upis);
+        createStudentPredmeti(indx, skolskaGodina, predmetiZaSlusanje);
         return EntityMapper.toDto(saved);
     }
 
     @Transactional
     public ObnovaGodineDto repeatYear(String indeksValue, ObnovaGodineRequest request) {
-        validateRepeatRequest(request);
-        Indeks indeks = findIndeksOrThrow(indeksValue);
-        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findById(request.getSkolskaGodinaId())
+        // naci indeks za studenta
+        Indeks indx = findIndeksOrThrow(indeksValue);
+        // naci aktivnu godinu studija
+        SkolskaGodina skolskaGodina = skolskaGodinaRepository.findAktivnaSkolskaGodina()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Skolska godina not found: " + request.getSkolskaGodinaId()));
-
-        if (obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, skolskaGodina)) {
+                        "Nema aktivne skolske fodine"));
+        // da li obnova vec postoji
+        if(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indx, skolskaGodina)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Student je već obnovio zadatu školsku godinu");
+                "godina je vec upisana");
         }
-
-        List<NastavnikPredmet> nastavnici = fetchNastavnikPredmeti(request.getNastavnikPredmetIds(), skolskaGodina);
-        validateEspbLimit(nastavnici);
-
+        // napravi novu obnovu
         ObnovaGodine obnova = ObnovaGodine.builder()
-                .studentskiIndeks(indeks)
-                .skolskaGodina(skolskaGodina)
-                .godinaStudija(request.getGodinaStudija())
-                .datumObnove(request.getDatumObnove() != null ? request.getDatumObnove() : LocalDate.now())
-                .napomena(request.getNapomena())
-                .predmeti(nastavnici.stream()
-                        .map(NastavnikPredmet::getPredmet)
-                        .collect(Collectors.toSet()))
-                .build();
+        .studentskiIndeks(indx)
+        .skolskaGodina(skolskaGodina)
+        .godinaStudija(request.getGodinaStudija())
+        .datumObnove(request.getDatumObnove() == null ? LocalDate.now() : request.getDatumObnove()) //default danas
+        .napomena(request.getNapomena())
+        .build();
 
-        ObnovaGodine saved = obnovaGodineRepository.save(obnova);
-        createStudentPredmeti(indeks, skolskaGodina, nastavnici);
-
-        return EntityMapper.toDto(saved);
+        // naci sve predmete iz sledece godine i pogledati da li se lista matchuje sa requestom
+        // dodati ih kao nepolozene predmete za studenta
+        // dodati ih u obnovu godine
+        // dodati kao slusa
+        return EntityMapper.toDto(obnova);
     }
 
     // pomcna funkcija
@@ -184,32 +206,7 @@ public class StudentService {
         return indeks;
     }
 
-    private void validateEnrollmentRequest(UpisGodineEnrollmentRequest request) {
-        if (request == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Body is required");
-        }
-        if (request.getSkolskaGodinaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Skolska godina je obavezna");
-        }
-        if (request.getGodinaStudija() == null || request.getGodinaStudija() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Godina studija mora biti pozitivan broj");
-        }
-    }
 
-    private void validateRepeatRequest(ObnovaGodineRequest request) {
-        if (request == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Body is required");
-        }
-        if (request.getSkolskaGodinaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Skolska godina je obavezna");
-        }
-        if (request.getGodinaStudija() == null || request.getGodinaStudija() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Godina studija mora biti pozitivan broj");
-        }
-        if (request.getNastavnikPredmetIds() == null || request.getNastavnikPredmetIds().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Potrebno je izabrati bar jedan predmet");
-        }
-    }
 
     private Set<Predmet> fetchPrenetiPredmeti(Set<Long> prenetiPredmetIds) {
         if (prenetiPredmetIds == null || prenetiPredmetIds.isEmpty()) {
@@ -265,6 +262,11 @@ public class StudentService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private List<Integer> resolveSemestersForYear(Integer godinaStudija) {
+        int firstSemester = (godinaStudija - 1) * 2 + 1;
+        return List.of(firstSemester, firstSemester + 1);
     }
 
 }

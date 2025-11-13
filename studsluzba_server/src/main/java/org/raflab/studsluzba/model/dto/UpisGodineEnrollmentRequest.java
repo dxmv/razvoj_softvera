@@ -15,9 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class UpisGodineEnrollmentRequest {
-    private Long skolskaGodinaId;
     private Integer godinaStudija;
     private LocalDate datumUpisa;
     private String napomena;
-    private Set<Long> prenetiPredmetIds;
 }

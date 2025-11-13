@@ -512,16 +512,16 @@ public class Seeder implements CommandLineRunner {
         System.out.println("Kreirano " + studentPredispitnaObavezaRepository.count() + " zapisa o predispitnim obavezama studenata");
 
         // Upis u novu školsku godinu
-        UpisGodine upisStudent1 = UpisGodine.builder()
-                .studentskiIndeks(indeks1)
-                .skolskaGodina(skolskaGodina2324)
-                .godinaStudija(2)
-                .datumUpisa(LocalDate.of(2023, 10, 2))
-                .napomena("Upis u drugu godinu studija")
-                .build();
-        upisStudent1.getPredmeti().add(prog2);
-        upisStudent1.getPredmeti().add(bp);
-        upisGodineRepository.save(upisStudent1);
+        // UpisGodine upisStudent1 = UpisGodine.builder()
+        //         .studentskiIndeks(indeks1)
+        //         .skolskaGodina(skolskaGodina2324)
+        //         .godinaStudija(2)
+        //         .datumUpisa(LocalDate.of(2023, 10, 2))
+        //         .napomena("Upis u drugu godinu studija")
+        //         .build();
+        // upisStudent1.getPredmeti().add(prog2);
+        // upisStudent1.getPredmeti().add(bp);
+        // upisGodineRepository.save(upisStudent1);
 
         UpisGodine upisStudent2 = UpisGodine.builder()
                 .studentskiIndeks(indeks2)
