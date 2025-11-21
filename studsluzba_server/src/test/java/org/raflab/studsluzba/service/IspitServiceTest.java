@@ -2,7 +2,6 @@ package org.raflab.studsluzba.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.raflab.studsluzba.model.*;
@@ -26,13 +25,12 @@ class IspitServiceTest {
     private IzlazakIspitRepository izlazakIspitRepository;
     @Mock
     private IspitRepository ispitRepository;
-
-    @InjectMocks
     private IspitService ispitService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        ispitService = new IspitService(repository, izlazakIspitRepository, ispitRepository);
     }
 
     @Test
