@@ -21,7 +21,7 @@ public class IspitService {
 
     private final IspitRepository repository;
     private final IzlazakIspitRepository izlazakIspitRepository;
-    private final IspitRepository ispitRepository;
+
 
 
     public Ispit create(Ispit entity) {
@@ -54,7 +54,7 @@ public class IspitService {
 
     }
     public List<RezultatIspitaStudentDto> getRezultatiIspitaSorted(Long ispitId) {
-        if (!ispitRepository.existsById(ispitId)) {
+        if (!repository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit nije pronađen: " + ispitId);
         }
 
