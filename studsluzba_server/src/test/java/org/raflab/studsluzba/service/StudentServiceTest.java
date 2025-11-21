@@ -462,4 +462,202 @@ class StudentServiceTest {
         // Act & Assert
         assertThrows(ResponseStatusException.class, () -> studentService.enroll(index, request));
     }
+
+    // 9. Obnova godine (repeatYear)
+
+    @Test
+    void testRepeatYear_Success() {
+        // Arrange
+        String index = "RI012021";
+        ObnovaGodineRequest request = new ObnovaGodineRequest();
+        request.setGodinaStudija(2);
+        request.setPredmetIds(new java.util.HashSet<>(Arrays.asList(101L, 102L)));
+
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+        aktivnaGodina.setId(1L);
+
+        ObnovaGodine savedObnova = new ObnovaGodine();
+        savedObnova.setGodinaStudija(2);
+        
+        // Mock passed subjects (empty)
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(false);
+        
+        // Mock existing passed subjects check
+        when(polozenPredmetRepository.findByStudentskiIndeks(eq(indeks), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+        
+        // Mock subjects lookup
+        Predmet p1 = new Predmet(); p1.setId(101L);
+        Predmet p2 = new Predmet(); p2.setId(102L);
+        when(predmetRepository.findAllById(request.getPredmetIds())).thenReturn(Arrays.asList(p1, p2));
+        
+        // Mock availability in current year and ESPB check
+        NastavnikPredmet np1 = new NastavnikPredmet(); np1.setPredmet(p1); p1.setEspbBodovi(6);
+        NastavnikPredmet np2 = new NastavnikPredmet(); np2.setPredmet(p2); p2.setEspbBodovi(6);
+        
+        when(nastavnikPredmetRepository.findBySkolskaGodinaIdAndPredmetIdIn(eq(1L), anySet()))
+                .thenReturn(Arrays.asList(np1, np2));
+        
+        when(obnovaGodineRepository.save(any(ObnovaGodine.class))).thenReturn(savedObnova);
+
+        // Act
+        ObnovaGodineDto result = studentService.repeatYear(index, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getGodinaStudija());
+        verify(obnovaGodineRepository, times(1)).save(any(ObnovaGodine.class));
+        verify(studentPredmetRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testRepeatYear_IndexNotFound() {
+        // Arrange
+        String index = "invalid-index";
+        when(indeksService.findByShort(index)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> studentService.repeatYear(index, new ObnovaGodineRequest()));
+    }
+
+    @Test
+    void testRepeatYear_NoActiveYear() {
+        // Arrange
+        String index = "RI012021";
+        when(indeksService.findByShort(index)).thenReturn(new Indeks());
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> studentService.repeatYear(index, new ObnovaGodineRequest()));
+    }
+
+    @Test
+    void testRepeatYear_AlreadyRenewed() {
+        // Arrange
+        String index = "RI012021";
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> studentService.repeatYear(index, new ObnovaGodineRequest()));
+    }
+
+    @Test
+    void testRepeatYear_NoSubjectsSelected() {
+        // Arrange
+        String index = "RI012021";
+        ObnovaGodineRequest request = new ObnovaGodineRequest();
+        request.setPredmetIds(Collections.emptySet());
+
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> studentService.repeatYear(index, request));
+    }
+
+    @Test
+    void testRepeatYear_SubjectAlreadyPassed() {
+        // Arrange
+        String index = "RI012021";
+        ObnovaGodineRequest request = new ObnovaGodineRequest();
+        request.setGodinaStudija(2);
+        request.setPredmetIds(new java.util.HashSet<>(Collections.singletonList(101L)));
+
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+
+        PolozenPredmet passed = new PolozenPredmet();
+        passed.setPredmet(new Predmet());
+        passed.getPredmet().setId(101L);
+
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(false);
+        
+        // Mock passed subject
+        when(polozenPredmetRepository.findByStudentskiIndeks(eq(indeks), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.singletonList(passed)));
+
+        // Act & Assert
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, 
+            () -> studentService.repeatYear(index, request));
+        assertTrue(ex.getMessage().contains("Predmet je vec polozen"));
+    }
+    
+    @Test
+    void testRepeatYear_SubjectNotAvailable() {
+        // Arrange
+        String index = "RI012021";
+        ObnovaGodineRequest request = new ObnovaGodineRequest();
+        request.setGodinaStudija(2);
+        request.setPredmetIds(new java.util.HashSet<>(Collections.singletonList(101L)));
+
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+        aktivnaGodina.setId(1L);
+
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(false);
+        when(polozenPredmetRepository.findByStudentskiIndeks(eq(indeks), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+        Predmet p1 = new Predmet(); p1.setId(101L);
+        when(predmetRepository.findAllById(request.getPredmetIds())).thenReturn(Collections.singletonList(p1));
+        
+        // Mock availability: return empty list (subject not in current year)
+        when(nastavnikPredmetRepository.findBySkolskaGodinaIdAndPredmetIdIn(eq(1L), anySet()))
+                .thenReturn(Collections.emptyList());
+
+        // Act & Assert
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, 
+            () -> studentService.repeatYear(index, request));
+        assertTrue(ex.getMessage().contains("nisu dostupni"));
+    }
+
+    @Test
+    void testRepeatYear_EspbLimitExceeded() {
+        // Arrange
+        String index = "RI012021";
+        ObnovaGodineRequest request = new ObnovaGodineRequest();
+        request.setGodinaStudija(2);
+        request.setPredmetIds(new java.util.HashSet<>(Collections.singletonList(101L)));
+
+        Indeks indeks = new Indeks();
+        SkolskaGodina aktivnaGodina = new SkolskaGodina();
+        aktivnaGodina.setId(1L);
+
+        when(indeksService.findByShort(index)).thenReturn(indeks);
+        when(skolskaGodinaRepository.findAktivnaSkolskaGodina()).thenReturn(java.util.Optional.of(aktivnaGodina));
+        when(obnovaGodineRepository.existsByStudentskiIndeksAndSkolskaGodina(indeks, aktivnaGodina)).thenReturn(false);
+        when(polozenPredmetRepository.findByStudentskiIndeks(eq(indeks), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+        Predmet p1 = new Predmet(); p1.setId(101L);
+        when(predmetRepository.findAllById(request.getPredmetIds())).thenReturn(Collections.singletonList(p1));
+        
+        NastavnikPredmet np1 = new NastavnikPredmet(); 
+        np1.setPredmet(p1); 
+        p1.setEspbBodovi(61); // Over 60 limit
+
+        when(nastavnikPredmetRepository.findBySkolskaGodinaIdAndPredmetIdIn(eq(1L), anySet()))
+                .thenReturn(Collections.singletonList(np1));
+
+        // Act & Assert
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, 
+            () -> studentService.repeatYear(index, request));
+        assertTrue(ex.getMessage().contains("ESPB"));
+    }
 }

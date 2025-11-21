@@ -2,14 +2,7 @@ package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.mapper.EntityMapper;
-import org.raflab.studsluzba.model.Indeks;
-import org.raflab.studsluzba.model.NastavnikPredmet;
-import org.raflab.studsluzba.model.ObnovaGodine;
-import org.raflab.studsluzba.model.Predmet;
-import org.raflab.studsluzba.model.SkolskaGodina;
-import org.raflab.studsluzba.model.Student;
-import org.raflab.studsluzba.model.StudentPredmet;
-import org.raflab.studsluzba.model.UpisGodine;
+import org.raflab.studsluzba.model.*;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.ObnovaGodineRequest;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
@@ -193,21 +186,18 @@ public class StudentService {
         .napomena(request.getNapomena())
         .build();
 
-        List<Predmet> nepolozeni = studentPredmetRepository
-                .findUnpassedSubjectsByIndeks(indx, Pageable.unpaged())
-                .getContent();
-        Set<Long> nepolozeniIds = nepolozeni.stream()
-                .map(Predmet::getId)
+        // Check if any requested subject is already passed
+        List<PolozenPredmet> polozeni = polozenPredmetRepository.findByStudentskiIndeks(indx, Pageable.unpaged()).getContent();
+        Set<Long> polozeniIds = polozeni.stream()
+                .map(pp -> pp.getPredmet().getId())
                 .collect(Collectors.toSet());
 
         Set<Long> trazeniPredmetIds = request.getPredmetIds();
-        // da li requestujemo polozene predmete
-        List<Long> polozeniRequest = trazeniPredmetIds.stream()
-                .filter(id -> !nepolozeniIds.contains(id))
-                .collect(Collectors.toList());
-        if (!polozeniRequest.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Predmet je vec polozen: " + polozeniRequest.get(0));
+        for (Long id : trazeniPredmetIds) {
+            if (polozeniIds.contains(id)) {
+                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Predmet je vec polozen: " + id);
+            }
         }
 
         List<Predmet> izabraniPredmeti = predmetRepository.findAllById(trazeniPredmetIds);
