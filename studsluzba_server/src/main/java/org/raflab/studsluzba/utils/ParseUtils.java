@@ -32,6 +32,17 @@ public class ParseUtils {
 		return retVal;		
 	}
 	/*
+	 * Format: PPBBGGGG
+	 * PP - stud program (e.g., RI)
+	 * BB - broj indeksa (e.g., 01)
+	 * GGGG - godina upisa (e.g., 2021)
+	 * Example: RI012021
+	 */
+	public static String formatIndeks(String studProgram, Integer broj, Integer godina) {
+		return String.format("%s%02d%d", studProgram, broj, godina);
+	}
+	
+	/*
 	 * dobija email studenta na primer ppetrovic1220rn@raf.rs, a vraca indeks u obliku  [rn, 20, 12]
 	 */
 	public static String[] parseEmail(String studEmail) {

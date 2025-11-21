@@ -6,6 +6,7 @@ import org.raflab.studsluzba.model.Predmet;
 import org.raflab.studsluzba.model.StudProgram;
 import org.raflab.studsluzba.model.dto.PredmetCreateDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
+import org.raflab.studsluzba.repositories.PolozenPredmetRepository;
 import org.raflab.studsluzba.repositories.PredmetRepository;
 import org.raflab.studsluzba.repositories.StudProgramRepository;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class PredmetService {
 
     private final PredmetRepository repository;
     private final StudProgramRepository studProgramRepository;
+    private final PolozenPredmetRepository polozenPredmetRepository;
 
     public Predmet create(Predmet entity) {
         if (entity.getId() != null) {
@@ -88,6 +90,14 @@ public class PredmetService {
         Predmet saved = repository.save(predmet);
 
         return EntityMapper.toDto(saved);
+    }
+
+    public Double getAverageGradeForSubjectInYearRange(Long predmetId, int yearFrom, int yearTo) {
+        if (!repository.existsById(predmetId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Predmet not found: " + predmetId);
+        }
+        Double avg = polozenPredmetRepository.findProsecnaOcenaZaPredmetUGodinama(predmetId, yearFrom, yearTo);
+        return avg != null ? avg : 0.0;
     }
 
 }
