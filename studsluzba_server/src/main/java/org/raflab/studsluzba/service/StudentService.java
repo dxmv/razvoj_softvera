@@ -51,6 +51,9 @@ public class StudentService {
 
     public Student update(Long id, Student entity) {
         Student existing = findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found: " + id);
+        }
         entity.setId(existing.getId());
         return repository.save(entity);
     }

@@ -41,6 +41,8 @@ class StudentServiceTest {
     @Mock
     private SrednjasSkolaRepository srednjasSkolaRepository;
     @Mock
+    private VSURepository vsuRepository;
+    @Mock
     private PredmetRepository predmetRepository;
     @Mock
     private NastavnikPredmetRepository nastavnikPredmetRepository;
@@ -58,7 +60,6 @@ class StudentServiceTest {
     @Test
     void testFindByIndex_Success() {
         // Arrange
-        // Koristimo format RI012021 umesto 2021/0001
         String index = "RI012021";
         Student student = new Student();
         student.setIme("Marko");
@@ -89,7 +90,6 @@ class StudentServiceTest {
     }
 
     // 2. Selekcija svih položenih ispita za broj indeksa studenta
-
     @Test
     void testFindPassedExamsByIndex_Success() {
         // Arrange
@@ -99,7 +99,7 @@ class StudentServiceTest {
         
         PolozenPredmet pp = new PolozenPredmet();
         pp.setOcena(10);
-        pp.setPredmet(new Predmet()); // Ensure predmet is not null for mapper
+        pp.setPredmet(new Predmet());
         pp.getPredmet().setNaziv("Matematika");
 
         Page<PolozenPredmet> page = new PageImpl<>(Collections.singletonList(pp));
@@ -169,7 +169,6 @@ class StudentServiceTest {
 
     @Test
     void testFindEnrolledYearsByIndex_Success() {
-        // Arrange
         String index = "RI012021";
         Indeks indeks = new Indeks();
         

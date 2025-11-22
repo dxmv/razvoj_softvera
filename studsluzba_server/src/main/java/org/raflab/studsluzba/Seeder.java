@@ -81,7 +81,7 @@ public class Seeder implements CommandLineRunner {
         // Kreiramo studijske programe
         StudProgram ri = StudProgram.builder()
                 .oznaka("RI")
-                .naziv("Nz")
+                .naziv("Racunarsko inz")
                 .godinaAkreditacije(2020)
                 .zvanje("Diplomirani inženjer računarstva i informatike")
                 .trajanjeSemestara(8)
