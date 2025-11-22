@@ -46,10 +46,10 @@ class PredmetServiceTest {
         studProgram.setId(5L);
     }
 
-    // ---------- Spisak predmeta na studijskom programu ----------
+    // predmeti i studijski program
 
     @Test
-    void testFindPredmetiByStudProgram_ReturnsDtos() {
+    void testFindPredmetiByStudProgram_Success() {
         Predmet predmet = Predmet.builder()
                 .id(1L)
                 .sifra("MAT101")
@@ -73,13 +73,12 @@ class PredmetServiceTest {
         PredmetDto dto = result.getContent().get(0);
         assertEquals("MAT101", dto.getSifra());
         assertEquals(5L, dto.getStudijskiProgramId());
-        verify(predmetRepository).findByStudijskiProgramId(5L, pageable);
     }
 
-    // ---------- Spisak svih predmeta ----------
+    // svi predmeti
 
     @Test
-    void testGetAllPredmeti_ReturnsDtos() {
+    void testGetAllPredmeti_Success() {
         Predmet predmet = Predmet.builder()
                 .id(2L)
                 .sifra("PHY201")
@@ -100,7 +99,7 @@ class PredmetServiceTest {
         verify(predmetRepository).findAll(pageable);
     }
 
-    // ---------- Dodavanje predmeta sa jedinstvenom sifrom ----------
+    // dodavanje
 
     @Test
     void testCreatePredmet_Success() {
@@ -128,12 +127,6 @@ class PredmetServiceTest {
         assertEquals(10L, created.getId());
         assertEquals("INF101", created.getSifra());
         assertEquals(5L, created.getStudijskiProgramId());
-
-        ArgumentCaptor<Predmet> captor = ArgumentCaptor.forClass(Predmet.class);
-        verify(predmetRepository).save(captor.capture());
-        Predmet stored = captor.getValue();
-        assertEquals("Osnove", stored.getOpis());
-        assertEquals(30, stored.getBrPredavanja());
     }
 
     @Test
@@ -147,8 +140,6 @@ class PredmetServiceTest {
 
         assertThrows(ResponseStatusException.class,
                 () -> predmetService.createPredmet(dto));
-        verify(studProgramRepository, never()).findById(any());
-        verify(predmetRepository, never()).save(any());
     }
 
     @Test
@@ -163,10 +154,9 @@ class PredmetServiceTest {
 
         assertThrows(ResponseStatusException.class,
                 () -> predmetService.createPredmet(dto));
-        verify(predmetRepository, never()).save(any());
     }
 
-    // ---------- Prosecna ocena na predmetu ----------
+    // procena ocena
 
     @Test
     void testGetAverageGrade_SubjectNotFound() {

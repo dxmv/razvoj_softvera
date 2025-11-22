@@ -56,11 +56,13 @@ public class PredmetService {
         }
         repository.deleteById(id);
     }
+
     public Page<PredmetDto> findPredmetiByStudijskiProgram(Long studProgramId, Pageable pageable) {
         return repository
                 .findByStudijskiProgramId(studProgramId, pageable)
                 .map(EntityMapper::toDto);
     }
+
     public Page<PredmetDto> getAllPredmeti(Pageable pageable) {
         return repository.findAll(pageable).map(EntityMapper::toDto);
     }

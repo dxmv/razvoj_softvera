@@ -57,7 +57,7 @@ public class PredmetController {
         return service.getAllPredmeti(pageable);
     }
 
-    @GetMapping("/{id}/prosecna-ocena")
+    @GetMapping("/{id}/avg")
     @ResponseStatus(HttpStatus.OK)
     public Double getAverageGrade(@PathVariable Long id,
                                   @RequestParam int yearFrom,
