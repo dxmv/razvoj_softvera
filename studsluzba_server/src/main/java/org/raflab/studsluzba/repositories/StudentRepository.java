@@ -13,9 +13,10 @@ import java.util.List;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-    @Query("SELECT s FROM Student s " +
-            "WHERE (:ime IS NULL OR LOWER(s.ime) LIKE LOWER(CONCAT('%', :ime, '%'))) " +
-            "AND (:prezime IS NULL OR LOWER(s.prezime) LIKE LOWER(CONCAT('%', :prezime, '%')))")
+    @Query(value = "SELECT * FROM student s " +
+            "WHERE (:ime IS NULL OR s.ime ILIKE CONCAT('%', :ime, '%')) " +
+            "AND (:prezime IS NULL OR s.prezime ILIKE CONCAT('%', :prezime, '%'))",
+            nativeQuery = true)
     Page<Student> searchByImeAndPrezime(@Param("ime") String ime, @Param("prezime") String prezime, Pageable pageable);
 
     @Query("SELECT DISTINCT s FROM Student s " +
