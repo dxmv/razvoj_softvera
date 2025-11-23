@@ -2,7 +2,7 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Ispit;
-import org.raflab.studsluzba.model.dto.IzlazakIspitDto;
+import org.raflab.studsluzba.model.dto.IspitDto;
 import org.raflab.studsluzba.model.dto.RezultatIspitaStudentDto;
 import org.raflab.studsluzba.service.IspitService;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class IspitController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Ispit create(@RequestBody Ispit body) {
+    public IspitDto create(@RequestBody IspitDto body) {
         return service.create(body);
     }
 
@@ -29,7 +29,7 @@ public class IspitController {
     }
 
     @PutMapping("/{id}")
-    public Ispit update(@PathVariable Long id, @RequestBody Ispit body) {
+    public IspitDto update(@PathVariable Long id, @RequestBody IspitDto body) {
         return service.update(id, body);
     }
 
@@ -38,14 +38,13 @@ public class IspitController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+    
     @GetMapping("/{ispitId}/prosecna-ocena")
     @ResponseStatus(HttpStatus.OK)
     public Double getProsecnaOcena(@PathVariable Long ispitId) {
         return service.getProsecnaOcenaNaIspitu(ispitId);
-
-
-
     }
+
     @GetMapping("/{ispitId}/rezultati")
     @ResponseStatus(HttpStatus.OK)
     public List<RezultatIspitaStudentDto> getRezultatiIspita(@PathVariable Long ispitId) {

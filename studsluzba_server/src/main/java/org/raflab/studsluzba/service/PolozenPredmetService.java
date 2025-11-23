@@ -34,6 +34,7 @@ public class PolozenPredmetService {
         }
         repository.deleteById(id);
     }
+    
     public Double getProsecnaOcenaZaPredmetUGodinama(Long predmetId, int godinaOd, int godinaDo) {
         Double prosek = repository.findProsecnaOcenaZaPredmetUGodinama(predmetId, godinaOd, godinaDo);
         if (prosek == null) {

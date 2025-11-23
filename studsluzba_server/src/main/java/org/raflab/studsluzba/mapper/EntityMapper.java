@@ -231,6 +231,20 @@ public final class EntityMapper {
                 .build();
     }
 
+    public static UplataDto toDto(Uplata entity) {
+        if (entity == null) {
+            return null;
+        }
+        return UplataDto.builder()
+                .id(entity.getId())
+                .studentId(entity.getStudent() != null ? entity.getStudent().getId() : null)
+                .skolskaGodinaId(entity.getSkolskaGodina() != null ? entity.getSkolskaGodina().getId() : null)
+                .datumUplate(entity.getDatumUplate())
+                .iznosUDinarima(entity.getIznosUDinarima())
+                .srednjiKurs(entity.getSrednjiKurs())
+                .build();
+    }
+
     public static IzlazakIspitDto toDto(IzlazakIspit entity) {
         if (entity == null) {
             return null;

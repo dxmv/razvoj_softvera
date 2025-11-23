@@ -2,6 +2,7 @@ package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.client.ExchangeRateClient;
+import org.raflab.studsluzba.mapper.EntityMapper;
 import org.raflab.studsluzba.model.SkolskaGodina;
 import org.raflab.studsluzba.model.Student;
 import org.raflab.studsluzba.model.Uplata;
@@ -44,7 +45,7 @@ public class UplataService {
 
     public UplataDto findDtoById(Long id) {
         Uplata uplata = findById(id);
-        return toDto(uplata);
+        return EntityMapper.toDto(uplata);
     }
 
     public Uplata update(Long id, Uplata entity) {
@@ -80,7 +81,7 @@ public class UplataService {
                 .build();
 
         Uplata saved = repository.save(uplata);
-        return toDto(saved);
+        return EntityMapper.toDto(saved);
     }
 
     public RemainingTuitionDto getRemainingTuition(Long studentId) {
@@ -119,17 +120,6 @@ public class UplataService {
         return uplate.stream()
                 .map(u -> convertToEur(u.getIznosUDinarima(), u.getSrednjiKurs()))
                 .reduce(BigDecimal.ZERO, (prev, current) -> prev.add(current));
-    }
-
-    private UplataDto toDto(Uplata entity) {
-        return UplataDto.builder()
-                .id(entity.getId())
-                .studentId(entity.getStudent() != null ? entity.getStudent().getId() : null)
-                .skolskaGodinaId(entity.getSkolskaGodina() != null ? entity.getSkolskaGodina().getId() : null)
-                .datumUplate(entity.getDatumUplate())
-                .iznosUDinarima(entity.getIznosUDinarima())
-                .srednjiKurs(entity.getSrednjiKurs())
-                .build();
     }
 
     private BigDecimal convertToEur(BigDecimal iznosRsd, BigDecimal kurs) {

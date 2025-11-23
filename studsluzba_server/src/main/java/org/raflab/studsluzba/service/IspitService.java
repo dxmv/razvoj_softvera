@@ -3,11 +3,13 @@ package org.raflab.studsluzba.service;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.mapper.EntityMapper;
 import org.raflab.studsluzba.model.*;
-import org.raflab.studsluzba.model.dto.IzlazakIspitDto;
+import org.raflab.studsluzba.model.dto.IspitDto;
 import org.raflab.studsluzba.model.dto.RezultatIspitaStudentDto;
-import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.repositories.IspitRepository;
 import org.raflab.studsluzba.repositories.IzlazakIspitRepository;
+import org.raflab.studsluzba.repositories.NastavnikRepository;
+import org.raflab.studsluzba.repositories.PredmetRepository;
+import org.raflab.studsluzba.repositories.IspitniRokRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,11 +23,22 @@ public class IspitService {
 
     private final IspitRepository repository;
     private final IzlazakIspitRepository izlazakIspitRepository;
-    private final IspitRepository ispitRepository;
+    private final PredmetRepository predmetRepository;
+    private final NastavnikRepository nastavnikRepository;
+    private final IspitniRokRepository ispitniRokRepository;
 
 
-    public Ispit create(Ispit entity) {
-        return repository.save(entity);
+    public IspitDto create(IspitDto dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ispit body is required");
+        }
+        if (dto.getId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID must not be provided when creating");
+        }
+        Ispit entity = new Ispit();
+        applyIspitDto(dto, entity);
+        Ispit saved = repository.save(entity);
+        return EntityMapper.toDto(saved);
     }
 
     public Ispit findById(Long id) {
@@ -33,10 +46,14 @@ public class IspitService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit not found: " + id));
     }
 
-    public Ispit update(Long id, Ispit entity) {
+    public IspitDto update(Long id, IspitDto dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ispit body is required");
+        }
         Ispit existing = findById(id);
-        entity.setId(existing.getId());
-        return repository.save(entity);
+        applyIspitDto(dto, existing);
+        Ispit saved = repository.save(existing);
+        return EntityMapper.toDto(saved);
     }
 
     public void delete(Long id) {
@@ -51,10 +68,10 @@ public class IspitService {
         return polozeni.stream()
                 .mapToInt(PolozenPredmet::getOcena)
                 .average().orElse(0);
-
     }
+
     public List<RezultatIspitaStudentDto> getRezultatiIspitaSorted(Long ispitId) {
-        if (!ispitRepository.existsById(ispitId)) {
+        if (!repository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit nije pronađen: " + ispitId);
         }
 
@@ -78,5 +95,44 @@ public class IspitService {
                 })
                 .collect(Collectors.toList());
 
+    }
+    private void applyIspitDto(IspitDto dto, Ispit target) {
+        target.setDatum(dto.getDatum());
+        target.setVremePocetka(dto.getVremePocetka());
+        if (dto.getZakljucen() != null) {
+            target.setZakljucen(dto.getZakljucen());
+        } else if (target.getZakljucen() == null) {
+            target.setZakljucen(Boolean.FALSE);
+        }
+        target.setPredmet(resolvePredmet(dto.getPredmetId()));
+        target.setNastavnik(resolveNastavnik(dto.getNastavnikId()));
+        target.setIspitniRok(resolveIspitniRok(dto.getIspitniRokId()));
+    }
+
+    private Predmet resolvePredmet(Long predmetId) {
+        if (predmetId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Predmet must be provided");
+        }
+        return predmetRepository.findById(predmetId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Predmet not found: " + predmetId));
+    }
+
+    private Nastavnik resolveNastavnik(Long nastavnikId) {
+        if (nastavnikId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nastavnik must be provided");
+        }
+        return nastavnikRepository.findById(nastavnikId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Nastavnik not found: " + nastavnikId));
+    }
+
+    private IspitniRok resolveIspitniRok(Long rokId) {
+        if (rokId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ispitni rok must be provided");
+        }
+        return ispitniRokRepository.findById(rokId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Ispitni rok not found: " + rokId));
     }
 }

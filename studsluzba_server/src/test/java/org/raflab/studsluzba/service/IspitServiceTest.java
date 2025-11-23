@@ -2,12 +2,16 @@ package org.raflab.studsluzba.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.raflab.studsluzba.model.*;
 import org.raflab.studsluzba.model.dto.RezultatIspitaStudentDto;
 import org.raflab.studsluzba.repositories.IspitRepository;
 import org.raflab.studsluzba.repositories.IzlazakIspitRepository;
+import org.raflab.studsluzba.repositories.NastavnikRepository;
+import org.raflab.studsluzba.repositories.PredmetRepository;
+import org.raflab.studsluzba.repositories.IspitniRokRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -24,13 +28,18 @@ class IspitServiceTest {
     @Mock
     private IzlazakIspitRepository izlazakIspitRepository;
     @Mock
-    private IspitRepository ispitRepository;
+    private PredmetRepository predmetRepository;
+    @Mock
+    private NastavnikRepository nastavnikRepository;
+    @Mock
+    private IspitniRokRepository ispitniRokRepository;
+
+    @InjectMocks
     private IspitService ispitService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        ispitService = new IspitService(repository, izlazakIspitRepository, ispitRepository);
     }
 
     @Test
@@ -54,7 +63,7 @@ class IspitServiceTest {
 
     @Test
     void testGetRezultatiIspitaSorted_Success() {
-        when(ispitRepository.existsById(4L)).thenReturn(true);
+        when(repository.existsById(4L)).thenReturn(true);
 
         StudProgram program = new StudProgram();
         program.setOznaka("RI");
@@ -92,7 +101,7 @@ class IspitServiceTest {
 
     @Test
     void testGetRezultatiIspitaSorted_IspitMissing() {
-        when(ispitRepository.existsById(4L)).thenReturn(false);
+        when(repository.existsById(4L)).thenReturn(false);
 
         assertThrows(ResponseStatusException.class,
                 () -> ispitService.getRezultatiIspitaSorted(4L));

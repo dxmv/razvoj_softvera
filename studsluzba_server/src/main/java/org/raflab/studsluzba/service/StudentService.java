@@ -37,11 +37,22 @@ public class StudentService {
     private final SkolskaGodinaRepository skolskaGodinaRepository;
     private final ObnovaGodineRepository obnovaGodineRepository;
     private final SrednjasSkolaRepository srednjasSkolaRepository;
+    private final VSURepository vsuRepository;
     private final PredmetRepository predmetRepository;
     private final NastavnikPredmetRepository nastavnikPredmetRepository;
 
-    public Student create(Student entity) {
-        return repository.save(entity);
+    public StudentDto create(StudentDto dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student body is required");
+        }
+        if (dto.getId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student ID must not be provided when creating");
+        }
+
+        Student entity = new Student();
+        applyStudentDto(dto, entity);
+        Student saved = repository.save(entity);
+        return EntityMapper.toDto(saved);
     }
 
     public Student findById(Long id) {
@@ -49,13 +60,14 @@ public class StudentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found: " + id));
     }
 
-    public Student update(Long id, Student entity) {
-        Student existing = findById(id);
-        if (existing == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found: " + id);
+    public StudentDto update(Long id, StudentDto dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student body is required");
         }
-        entity.setId(existing.getId());
-        return repository.save(entity);
+        Student existing = findById(id);
+        applyStudentDto(dto, existing);
+        Student saved = repository.save(existing);
+        return EntityMapper.toDto(saved);
     }
 
     public void delete(Long id) {
@@ -283,6 +295,49 @@ public class StudentService {
                         .build())
                 .collect(Collectors.toList());
         studentPredmetRepository.saveAll(noviZapisi);
+    }
+
+    private void applyStudentDto(StudentDto dto, Student target) {
+        target.setIme(dto.getIme());
+        target.setPrezime(dto.getPrezime());
+        target.setSrednjeIme(dto.getSrednjeIme());
+        target.setJmbg(dto.getJmbg());
+        target.setDatumRodjenja(dto.getDatumRodjenja());
+        target.setMestoRodjenja(dto.getMestoRodjenja());
+        target.setDrzavaRodjenja(dto.getDrzavaRodjenja());
+        target.setDrzavljanstvo(dto.getDrzavljanstvo());
+        target.setNacionalnost(dto.getNacionalnost());
+        target.setPol(dto.getPol());
+        target.setMestoPrebivalista(dto.getMestoPrebivalista());
+        target.setUlicaPrebivalista(dto.getUlicaPrebivalista());
+        target.setBrojPrebivalista(dto.getBrojPrebivalista());
+        target.setBrojTelefona(dto.getBrojTelefona());
+        target.setFakultetskiEmail(dto.getFakultetskiEmail());
+        target.setPrivatniEmail(dto.getPrivatniEmail());
+        target.setBrojLicneKarte(dto.getBrojLicneKarte());
+        target.setIzdavalacLicneKarte(dto.getIzdavalacLicneKarte());
+        target.setUspehSrednjaSkola(dto.getUspehSrednjaSkola());
+        target.setUspehPrijemni(dto.getUspehPrijemni());
+        target.setZavrsenaSkola(resolveSrednjaSkola(dto.getZavrsenaSkolaId()));
+        target.setPrethodnaVisokoskolskaUstanova(resolveVisokoskolska(dto.getPrethodnaVisokoskolskaUstanovaId()));
+    }
+
+    private SrednjaSkola resolveSrednjaSkola(Long skolaId) {
+        if (skolaId == null) {
+            return null;
+        }
+        return srednjasSkolaRepository.findById(skolaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Srednja skola not found: " + skolaId));
+    }
+
+    private VSU resolveVisokoskolska(Long vsuId) {
+        if (vsuId == null) {
+            return null;
+        }
+        return vsuRepository.findById(vsuId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "VSU not found: " + vsuId));
     }
 
     private String normalize(String value) {

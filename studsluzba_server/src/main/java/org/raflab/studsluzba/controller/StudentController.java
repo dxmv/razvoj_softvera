@@ -26,7 +26,7 @@ public class StudentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Student create(@RequestBody Student body) {
+    public StudentDto create(@RequestBody StudentDto body) {
         return service.create(body);
     }
 
@@ -36,7 +36,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public Student update(@PathVariable Long id, @RequestBody Student body) {
+    public StudentDto update(@PathVariable Long id, @RequestBody StudentDto body) {
         return service.update(id, body);
     }
 

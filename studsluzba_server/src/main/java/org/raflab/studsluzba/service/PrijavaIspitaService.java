@@ -81,8 +81,6 @@ public class PrijavaIspitaService {
                     "Student je vec prijavio ovaj ispit");
         }
 
-
-
         PrijavaIspita prijava = PrijavaIspita.builder()
                 .ispit(ispit)
                 .studentskiIndeks(studentPredmet.getIndeks())
