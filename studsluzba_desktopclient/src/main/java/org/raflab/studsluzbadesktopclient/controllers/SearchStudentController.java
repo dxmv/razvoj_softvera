@@ -13,7 +13,6 @@ import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 @Component
 public class SearchStudentController {
@@ -56,10 +55,11 @@ public class SearchStudentController {
 
     public void handleSearchStudent(ActionEvent actionEvent) {
         String imeFilter = imeStudentaTf.getText() == null ? "" : imeStudentaTf.getText().trim();
-        Flux<StudentDto> source = imeFilter.isEmpty()
-                ? studentService.fetchAllStudentsAsync()
-                : studentService.searchStudentsAsync(imeFilter);
-        populateStudents(source);
+        if (imeFilter.isEmpty()) {
+            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.sviStudenti()));
+        } else {
+            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.searchStudentsPaged(imeFilter)));
+        }
     }
 
     public void handleFindStudentByIndex(ActionEvent actionEvent) {
@@ -90,14 +90,6 @@ public class SearchStudentController {
 
     public void handleOpenSelectedStudentProfile(ActionEvent actionEvent) {
         openSelectedStudentProfile();
-    }
-
-    private void populateStudents(Flux<StudentDto> flux) {
-        flux.collectList()
-                .subscribe(
-                        list -> tabelaStudenti.setItems(FXCollections.observableArrayList(list)),
-                        error -> System.out.println(error.getMessage())
-                );
     }
 
     private void openStudentProfile(StudentDto student, String indeks) {

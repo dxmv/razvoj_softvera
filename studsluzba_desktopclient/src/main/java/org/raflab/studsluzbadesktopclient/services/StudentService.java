@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,8 +33,6 @@ public class StudentService {
 	private final String STUDENT_URL_PATH = "/student";
 	private final String API_STUDENT_PATH = "/api/studenti";
     private static final int DEFAULT_PAGE_SIZE = 1000;
-    private static final ParameterizedTypeReference<PageResponse<StudentDto>> STUDENT_PAGE_TYPE =
-            new ParameterizedTypeReference<>() {};
 
     private String createURL(String pathEnd) {
 		return baseUrl + STUDENT_URL_PATH + "/" + pathEnd;
@@ -85,6 +82,14 @@ public class StudentService {
 
     public List<StudentDto> sviStudenti() {
 		return fetchAllStudentsAsync().collectList().blockOptional().orElse(List.of());
+    }
+
+    public List<StudentDto> searchStudentsPaged(String ime) {
+		return fetchStudentPageBlocking(API_STUDENT_PATH + "/search", builder -> {
+			if (ime != null && !ime.trim().isEmpty()) {
+				builder.queryParam("ime", ime.trim());
+			}
+		});
     }
 
 	public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
@@ -169,20 +174,24 @@ public class StudentService {
 				.bodyToFlux(ObnovaGodineDto.class);
 	}
 
-	private Flux<StudentDto> fetchStudentPage(String path, Consumer<UriBuilder> uriCustomizer) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> {
-					UriBuilder builder = uriBuilder.path(path)
-							.queryParam("page", 0)
-							.queryParam("size", DEFAULT_PAGE_SIZE);
-					if (uriCustomizer != null) {
-						uriCustomizer.accept(builder);
-					}
-					return builder.build();
-				})
-				.retrieve()
-				.bodyToMono(STUDENT_PAGE_TYPE)
-				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
+	private Flux<StudentDto> fetchStudentPage(String path, Consumer<UriComponentsBuilder> uriCustomizer) {
+		return Flux.fromIterable(fetchStudentPageBlocking(path, uriCustomizer));
+	}
+
+	private List<StudentDto> fetchStudentPageBlocking(String path, Consumer<UriComponentsBuilder> uriCustomizer) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + path)
+				.queryParam("page", 0)
+				.queryParam("size", DEFAULT_PAGE_SIZE);
+		if (uriCustomizer != null) {
+			uriCustomizer.accept(builder);
+		}
+		ResponseEntity<PageResponse<StudentDto>> response = restTemplate.exchange(
+				builder.toUriString(),
+				HttpMethod.GET,
+				HttpEntity.EMPTY,
+				new ParameterizedTypeReference<PageResponse<StudentDto>>() {}
+		);
+		PageResponse<StudentDto> body = response.getBody();
+		return body == null ? List.of() : body.getContent();
 	}
 }
