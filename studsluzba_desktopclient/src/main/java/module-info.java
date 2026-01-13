@@ -15,6 +15,7 @@ module stud_sluzba_desktop_client {
     exports org.raflab.studsluzbadesktopclient;
     exports org.raflab.studsluzbadesktopclient.controllers;
     exports org.raflab.studsluzbadesktopclient.services;
+    exports org.raflab.studsluzbadesktopclient.navigation;
     opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml;
     opens org.raflab.studsluzbadesktopclient.controllers to spring.core, javafx.fxml;
     // Allow Spring to use reflection on this package

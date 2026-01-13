@@ -3,24 +3,20 @@ package org.raflab.studsluzbadesktopclient.controllers;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Circle;
 import org.raflab.studsluzba.model.dto.StudentDto;
+import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
 
 @Component
 public class SearchStudentController {
 
     private final StudentService studentService;
+    private final MainView mainView;
 
     @FXML
     private TextField imeStudentaTf;
@@ -28,8 +24,18 @@ public class SearchStudentController {
     @FXML
     private TableView<StudentDto> tabelaStudenti;
 
-    public SearchStudentController(StudentService studentService) {
+    public SearchStudentController(StudentService studentService, MainView mainView) {
         this.studentService = studentService;
+        this.mainView = mainView;
+    }
+
+    @FXML
+    public void initialize() {
+        tabelaStudenti.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                openSelectedStudentProfile();
+            }
+        });
     }
 
     public void handleSearchStudent(ActionEvent actionEvent) {
@@ -51,5 +57,14 @@ public class SearchStudentController {
                     );
             System.out.println("Nakon search operacije.");
         }
+    }
+
+    private void openSelectedStudentProfile() {
+        StudentDto selected = tabelaStudenti.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+        // TODO: When a dedicated student profile view is implemented, pass the student id via ViewState attributes.
+        mainView.navigateTo("newStudent");
     }
 }

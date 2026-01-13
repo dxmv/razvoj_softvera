@@ -1,18 +1,19 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MainWindowController {
-	
-    private ApplicationContext context;
-	
-	@FXML
-	private BorderPane mainPane;
 
+    @FXML
+    private BorderPane mainPane;
+
+    public void setContent(Node node) {
+        if (mainPane != null) {
+            mainPane.setCenter(node);
+        }
+    }
 }

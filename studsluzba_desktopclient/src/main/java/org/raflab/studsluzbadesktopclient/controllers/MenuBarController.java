@@ -22,19 +22,19 @@ public class MenuBarController {
     }
 
 	public void openSearchStudent() {
-		mainView.changeRoot("searchStudent");
+		mainView.navigateTo("searchStudent");
 	}
 
 	public void openNewStudent() {
-		mainView.changeRoot("newStudent");
+		mainView.navigateTo("newStudent");
 	}
 
 	public void openEventsPage(){
-		mainView.changeRoot("events");
+		mainView.navigateTo("events");
 	}
 
 	public void openReportsPage(){
-		mainView.changeRoot("reports");
+		mainView.navigateTo("reports");
 	}
 
 	@FXML

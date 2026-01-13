@@ -9,6 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
@@ -32,7 +33,9 @@ public class StudsluzbaFxClientApp extends Application {
     public void start(Stage primaryStage) throws IOException {
     	primaryStage.setTitle("RAF Studentska služba");
     	MainView mainView = springContext.getBean(MainView.class);
-    	primaryStage.setScene(mainView.createScene());
+    	Scene scene = mainView.createScene();
+    	mainView.bindNavigationInputs(scene);
+    	primaryStage.setScene(scene);
     	primaryStage.show();
     }
     
