@@ -5,6 +5,7 @@ import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,14 +29,19 @@ public class SkoleService {
 	}
 
 
-	public List<SrednjaSkolaDto> getSrednjeSkole() throws Exception{
-
-		return webClient.get()
-				.uri(baseUrl + SKOLA_URL_PATH)
-				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.bodyToFlux(SrednjaSkolaDto.class)
-				.collectList()
-				.block();
+	public List<SrednjaSkolaDto> getSrednjeSkole() {
+		try {
+			return webClient.get()
+					.uri(baseUrl + SKOLA_URL_PATH)
+					.accept(MediaType.APPLICATION_JSON)
+					.retrieve()
+					.bodyToFlux(SrednjaSkolaDto.class)
+					.collectList()
+					.blockOptional()
+					.orElse(Collections.emptyList());
+		} catch (RuntimeException ex) {
+			System.out.println("Neuspešno učitavanje srednjih škola: " + ex.getMessage());
+			return Collections.emptyList();
+		}
 	}
 }

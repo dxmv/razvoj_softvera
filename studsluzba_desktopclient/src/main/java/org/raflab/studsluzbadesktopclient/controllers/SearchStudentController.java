@@ -1,5 +1,7 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
+import javafx.application.Platform;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,6 +21,7 @@ import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Component
@@ -65,29 +68,25 @@ public class SearchStudentController {
             openProfileButton.disableProperty().bind(tabelaStudenti.getSelectionModel().selectedItemProperty().isNull());
         }
         initializeSrednjaSkolaFilter();
+        if (srednjaSkolaFilterCb != null) {
+            srednjaSkolaFilterCb.setOnAction(event -> handleSearchStudent(null));
+        }
+        Platform.runLater(() -> handleSearchStudent(null));
     }
 
     public void handleSearchStudent(ActionEvent actionEvent) {
         String imeFilter = imeStudentaTf.getText() == null ? "" : imeStudentaTf.getText().trim();
         SrednjaSkolaDto selectedSkola = srednjaSkolaFilterCb != null ? srednjaSkolaFilterCb.getValue() : null;
 
-        if (selectedSkola != null) {
-            List<StudentDto> students = studentService.findStudentsByHighSchool(selectedSkola.getId());
-            if (!imeFilter.isEmpty()) {
-                String lower = imeFilter.toLowerCase();
-                students = students.stream()
-                        .filter(student -> student.getIme() != null && student.getIme().toLowerCase().contains(lower))
-                        .collect(Collectors.toList());
-            }
-            tabelaStudenti.setItems(FXCollections.observableArrayList(students));
-            return;
-        }
-
-        if (imeFilter.isEmpty()) {
-            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.sviStudenti()));
-        } else {
-            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.searchStudentsPaged(imeFilter)));
-        }
+        CompletableFuture
+                .supplyAsync(() -> fetchStudents(imeFilter, selectedSkola))
+                .thenAccept(students -> Platform.runLater(() ->
+                        tabelaStudenti.setItems(FXCollections.observableArrayList(students))))
+                .exceptionally(ex -> {
+                    String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                    Platform.runLater(() -> showInfo("Greška pri učitavanju studenata: " + message));
+                    return null;
+                });
     }
 
     public void handleClearHighSchoolFilter(ActionEvent actionEvent) {
@@ -147,6 +146,22 @@ public class SearchStudentController {
         alert.showAndWait();
     }
 
+    private List<StudentDto> fetchStudents(String imeFilter, SrednjaSkolaDto selectedSkola) {
+        if (selectedSkola != null) {
+            List<StudentDto> students = studentService.findStudentsByHighSchool(selectedSkola.getId());
+            if (!imeFilter.isEmpty()) {
+                String lower = imeFilter.toLowerCase();
+                return students.stream()
+                        .filter(student -> student.getIme() != null && student.getIme().toLowerCase().contains(lower))
+                        .collect(Collectors.toList());
+            }
+            return students;
+        }
+        return imeFilter.isEmpty()
+                ? studentService.sviStudenti()
+                : studentService.searchStudentsPaged(imeFilter);
+    }
+
     private void initializeSrednjaSkolaFilter() {
         if (srednjaSkolaFilterCb == null) {
             return;
@@ -165,12 +180,15 @@ public class SearchStudentController {
                 setText(empty || item == null ? "" : formatSchool(item));
             }
         });
-        try {
-            List<SrednjaSkolaDto> skole = skoleService.getSrednjeSkole();
-            srednjaSkolaFilterCb.setItems(FXCollections.observableArrayList(skole));
-        } catch (Exception ex) {
-            System.out.println("Neuspešno učitavanje srednjih škola: " + ex.getMessage());
-        }
+        CompletableFuture
+                .supplyAsync(skoleService::getSrednjeSkole)
+                .thenAccept(skole -> Platform.runLater(() ->
+                        srednjaSkolaFilterCb.setItems(FXCollections.observableArrayList(skole))))
+                .exceptionally(ex -> {
+                    String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                    Platform.runLater(() -> showInfo("Greška pri učitavanju srednjih škola: " + message));
+                    return null;
+                });
     }
 
     private String formatSchool(SrednjaSkolaDto dto) {
