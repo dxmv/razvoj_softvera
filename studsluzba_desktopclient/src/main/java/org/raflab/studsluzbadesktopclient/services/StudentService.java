@@ -109,7 +109,7 @@ public class StudentService {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
-						.path("/student/by-index/{index}")
+						.path("/api/studenti/by-index/{index}")
 						.build(indeks))
 				.retrieve()
 				.bodyToMono(StudentDto.class);
