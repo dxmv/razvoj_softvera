@@ -18,13 +18,13 @@ public class SkoleService {
 	private static final String SKOLA_URL_PATH = "/api/srednje-skole";
 
 
-	public Integer saveSrednjaSkola(SrednjaSkolaDto ss) {
+	public SrednjaSkolaDto saveSrednjaSkola(SrednjaSkolaDto ss) {
 		return webClient.post()
 				.uri(baseUrl + SKOLA_URL_PATH)
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(ss)
 				.retrieve()
-				.bodyToMono(Integer.class)
+				.bodyToMono(SrednjaSkolaDto.class)
 				.block();
 	}
 

@@ -59,10 +59,13 @@ public class StudentService {
 				.collectList().block();
 	}
 
-	public Flux<StudentDto> searchStudentsAsync(String ime) {
+	public Flux<StudentDto> searchStudentsAsync(String ime, String prezime) {
 		return fetchStudentPage(API_STUDENT_PATH + "/search", builder -> {
 			if (ime != null && !ime.trim().isEmpty()) {
 				builder.queryParam("ime", ime.trim());
+			}
+			if (prezime != null && !prezime.trim().isEmpty()) {
+				builder.queryParam("prezime", prezime.trim());
 			}
 		});
 	}
@@ -84,10 +87,13 @@ public class StudentService {
 		return fetchAllStudentsAsync().collectList().blockOptional().orElse(List.of());
     }
 
-    public List<StudentDto> searchStudentsPaged(String ime) {
+	public List<StudentDto> searchStudentsPaged(String ime, String prezime) {
 		return fetchStudentPageBlocking(API_STUDENT_PATH + "/search", builder -> {
 			if (ime != null && !ime.trim().isEmpty()) {
 				builder.queryParam("ime", ime.trim());
+			}
+			if (prezime != null && !prezime.trim().isEmpty()) {
+				builder.queryParam("prezime", prezime.trim());
 			}
 		});
     }

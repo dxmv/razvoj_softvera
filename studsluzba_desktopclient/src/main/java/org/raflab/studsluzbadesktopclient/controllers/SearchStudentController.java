@@ -36,6 +36,9 @@ public class SearchStudentController {
     private TextField imeStudentaTf;
 
     @FXML
+    private TextField prezimeStudentaTf;
+
+    @FXML
     private TextField brojIndeksaTf;
 
     @FXML
@@ -76,10 +79,13 @@ public class SearchStudentController {
 
     public void handleSearchStudent(ActionEvent actionEvent) {
         String imeFilter = imeStudentaTf.getText() == null ? "" : imeStudentaTf.getText().trim();
+        String prezimeFilter = prezimeStudentaTf != null && prezimeStudentaTf.getText() != null
+                ? prezimeStudentaTf.getText().trim()
+                : "";
         SrednjaSkolaDto selectedSkola = srednjaSkolaFilterCb != null ? srednjaSkolaFilterCb.getValue() : null;
 
         CompletableFuture
-                .supplyAsync(() -> fetchStudents(imeFilter, selectedSkola))
+                .supplyAsync(() -> fetchStudents(imeFilter, prezimeFilter, selectedSkola))
                 .thenAccept(students -> Platform.runLater(() ->
                         tabelaStudenti.setItems(FXCollections.observableArrayList(students))))
                 .exceptionally(ex -> {
@@ -146,20 +152,28 @@ public class SearchStudentController {
         alert.showAndWait();
     }
 
-    private List<StudentDto> fetchStudents(String imeFilter, SrednjaSkolaDto selectedSkola) {
+    private List<StudentDto> fetchStudents(String imeFilter, String prezimeFilter, SrednjaSkolaDto selectedSkola) {
         if (selectedSkola != null) {
             List<StudentDto> students = studentService.findStudentsByHighSchool(selectedSkola.getId());
-            if (!imeFilter.isEmpty()) {
-                String lower = imeFilter.toLowerCase();
+            if (!imeFilter.isEmpty() || !prezimeFilter.isEmpty()) {
+                String lowerIme = imeFilter.toLowerCase();
+                String lowerPrezime = prezimeFilter.toLowerCase();
                 return students.stream()
-                        .filter(student -> student.getIme() != null && student.getIme().toLowerCase().contains(lower))
+                        .filter(student -> matchesNameFilters(student, lowerIme, lowerPrezime))
                         .collect(Collectors.toList());
             }
             return students;
         }
-        return imeFilter.isEmpty()
-                ? studentService.sviStudenti()
-                : studentService.searchStudentsPaged(imeFilter);
+        if (imeFilter.isEmpty() && prezimeFilter.isEmpty()) {
+            return studentService.sviStudenti();
+        }
+        return studentService.searchStudentsPaged(imeFilter, prezimeFilter);
+    }
+
+    private boolean matchesNameFilters(StudentDto student, String lowerIme, String lowerPrezime) {
+        boolean matchesIme = lowerIme.isBlank() || (student.getIme() != null && student.getIme().toLowerCase().contains(lowerIme));
+        boolean matchesPrezime = lowerPrezime.isBlank() || (student.getPrezime() != null && student.getPrezime().toLowerCase().contains(lowerPrezime));
+        return matchesIme && matchesPrezime;
     }
 
     private void initializeSrednjaSkolaFilter() {

@@ -28,6 +28,8 @@
                 </padding>
                 <Label text="Ime"/>
                 <TextField fx:id="imeStudentaTf" maxWidth="200"/>
+                <Label text="Prezime"/>
+                <TextField fx:id="prezimeStudentaTf" maxWidth="200"/>
                 <Button onAction="#handleSearchStudent" text="Pretraga" />
             </HBox>
             <HBox alignment="CENTER" spacing="8">
