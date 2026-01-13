@@ -47,9 +47,6 @@
                                         <Label text="Prezime:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
                                         <Label fx:id="prezimeValue" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
-                                        <Label text="Srednje ime:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-                                        <Label fx:id="srednjeImeValue" GridPane.rowIndex="3" GridPane.columnIndex="1" />
-
                                         <Label text="JMBG:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
                                         <Label fx:id="jmbgValue" GridPane.rowIndex="4" GridPane.columnIndex="1" />
 

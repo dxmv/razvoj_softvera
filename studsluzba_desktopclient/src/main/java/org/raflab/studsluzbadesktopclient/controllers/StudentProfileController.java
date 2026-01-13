@@ -44,8 +44,6 @@ public class StudentProfileController {
     @FXML
     private Label prezimeValue;
     @FXML
-    private Label srednjeImeValue;
-    @FXML
     private Label jmbgValue;
     @FXML
     private Label datumRodjenjaValue;
@@ -267,7 +265,6 @@ public class StudentProfileController {
         indeksValue.setText(valueOrPlaceholder(indeks));
         imeValue.setText(valueOrPlaceholder(student.getIme()));
         prezimeValue.setText(valueOrPlaceholder(student.getPrezime()));
-        srednjeImeValue.setText(valueOrPlaceholder(student.getSrednjeIme()));
         jmbgValue.setText(valueOrPlaceholder(student.getJmbg()));
         datumRodjenjaValue.setText(valueOrPlaceholder(student.getDatumRodjenja()));
         mestoRodjenjaValue.setText(valueOrPlaceholder(student.getMestoRodjenja()));
@@ -286,7 +283,6 @@ public class StudentProfileController {
         indeksValue.setText("--");
         imeValue.setText("--");
         prezimeValue.setText("--");
-        srednjeImeValue.setText("--");
         jmbgValue.setText("--");
         datumRodjenjaValue.setText("--");
         mestoRodjenjaValue.setText("--");
