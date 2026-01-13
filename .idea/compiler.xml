@@ -2,24 +2,17 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
-      <profile name="Annotation profile for studsluzba_server" enabled="true">
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Annotation profile for studsluzba_desktopclient" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
+        <module name="studsluzba_desktopclient" />
         <module name="studsluzba_server" />
         <module name="studsluzba_dto" />
-      </profile>
-      <profile name="Annotation profile for studsluzba_desktopclient" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
-        </processorPath>
-        <module name="studsluzba_desktopclient" />
       </profile>
     </annotationProcessing>
   </component>

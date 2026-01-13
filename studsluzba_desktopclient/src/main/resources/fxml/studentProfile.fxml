@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.StudentProfileController">
+    <top>
+        <fx:include source="menuBar.fxml" />
+    </top>
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="20.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <Label fx:id="statusLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <GridPane hgap="12.0" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT" percentWidth="35" />
+                    <ColumnConstraints percentWidth="65" />
+                </columnConstraints>
+                <Label text="Broj indeksa:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <Label fx:id="indeksValue" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+                <Label text="Ime:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <Label fx:id="imeValue" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+                <Label text="Prezime:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <Label fx:id="prezimeValue" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+                <Label text="Srednje ime:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                <Label fx:id="srednjeImeValue" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+                <Label text="JMBG:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+                <Label fx:id="jmbgValue" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+                <Label text="Datum rođenja:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+                <Label fx:id="datumRodjenjaValue" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+
+                <Label text="Mesto rođenja:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+                <Label fx:id="mestoRodjenjaValue" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+
+                <Label text="Država rođenja:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+                <Label fx:id="drzavaRodjenjaValue" GridPane.rowIndex="7" GridPane.columnIndex="1" />
+
+                <Label text="Pol:" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+                <Label fx:id="polValue" GridPane.rowIndex="8" GridPane.columnIndex="1" />
+
+                <Label text="Državljanstvo:" GridPane.rowIndex="9" GridPane.columnIndex="0" />
+                <Label fx:id="drzavljanstvoValue" GridPane.rowIndex="9" GridPane.columnIndex="1" />
+
+                <Label text="Nacionalnost:" GridPane.rowIndex="10" GridPane.columnIndex="0" />
+                <Label fx:id="nacionalnostValue" GridPane.rowIndex="10" GridPane.columnIndex="1" />
+
+                <Label text="Mesto prebivališta:" GridPane.rowIndex="11" GridPane.columnIndex="0" />
+                <Label fx:id="mestoPrebivalistaValue" GridPane.rowIndex="11" GridPane.columnIndex="1" />
+
+                <Label text="Adresa:" GridPane.rowIndex="12" GridPane.columnIndex="0" />
+                <Label fx:id="adresaValue" GridPane.rowIndex="12" GridPane.columnIndex="1" />
+
+                <Label text="Broj telefona:" GridPane.rowIndex="13" GridPane.columnIndex="0" />
+                <Label fx:id="brojTelefonaValue" GridPane.rowIndex="13" GridPane.columnIndex="1" />
+
+                <Label text="Fakultetski email:" GridPane.rowIndex="14" GridPane.columnIndex="0" />
+                <Label fx:id="fakultetskiEmailValue" GridPane.rowIndex="14" GridPane.columnIndex="1" />
+
+                <Label text="Privatni email:" GridPane.rowIndex="15" GridPane.columnIndex="0" />
+                <Label fx:id="privatniEmailValue" GridPane.rowIndex="15" GridPane.columnIndex="1" />
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>

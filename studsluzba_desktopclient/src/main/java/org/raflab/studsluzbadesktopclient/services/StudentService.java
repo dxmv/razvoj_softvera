@@ -1,11 +1,9 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import java.util.List;
-import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.dto.StudentDto;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -15,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @AllArgsConstructor
@@ -104,5 +103,19 @@ public class StudentService {
 				.retrieve()
 				.bodyToFlux(StudentDto.class)
 				.collectList().block();
+	}
+
+	public Mono<StudentDto> findStudentByIndexAsync(String indeks) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path("/student/by-index/{index}")
+						.build(indeks))
+				.retrieve()
+				.bodyToMono(StudentDto.class);
+	}
+
+	public StudentDto findStudentByIndex(String indeks) {
+		return findStudentByIndexAsync(indeks).block();
 	}
 }
