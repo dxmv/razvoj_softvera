@@ -19,6 +19,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.SwipeEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -33,6 +34,9 @@ public class MainView {
 
     private static final String DEFAULT_VIEW = "searchStudent";
 
+    private static final long TOUCH_GESTURE_COOLDOWN_NANOS = 350_000_000L; // ~350ms
+    private static final double MIN_HORIZONTAL_SCROLL_DELTA = 35;
+
     private final ContextFXMLLoader appFXMLLoader;
     private final NavigationService navigationService;
 
@@ -42,6 +46,7 @@ public class MainView {
     private String activeViewId;
     private final Map<TabPane, ChangeListener<Tab>> tabListeners = new HashMap<>();
     private boolean suppressNavigationEvents;
+    private long lastGestureNanos;
 
     public MainView(ContextFXMLLoader appFXMLLoader, NavigationService navigationService) {
         this.appFXMLLoader = appFXMLLoader;
@@ -86,13 +91,36 @@ public class MainView {
                 new KeyCodeCombination(KeyCode.CLOSE_BRACKET, KeyCombination.CONTROL_DOWN),
                 navigationService::forward);
 
-        targetScene.addEventHandler(SwipeEvent.SWIPE_LEFT, event -> {
-            if (navigationService.back()) {
+        targetScene.addEventFilter(SwipeEvent.ANY, event -> {
+            boolean requestBack = event.getEventType() == SwipeEvent.SWIPE_LEFT;
+            boolean requestForward = event.getEventType() == SwipeEvent.SWIPE_RIGHT;
+            if (!requestBack && !requestForward) {
+                return;
+            }
+            if (!allowGestureTrigger()) {
+                event.consume();
+                return;
+            }
+            boolean handled = requestBack ? navigationService.back() : navigationService.forward();
+            if (handled) {
                 event.consume();
             }
         });
-        targetScene.addEventHandler(SwipeEvent.SWIPE_RIGHT, event -> {
-            if (navigationService.forward()) {
+
+        targetScene.addEventFilter(ScrollEvent.SCROLL, event -> {
+            if (!event.isDirect()) {
+                return;
+            }
+            double absX = Math.abs(event.getDeltaX());
+            if (absX < MIN_HORIZONTAL_SCROLL_DELTA || absX < Math.abs(event.getDeltaY())) {
+                return;
+            }
+            if (!allowGestureTrigger()) {
+                event.consume();
+                return;
+            }
+            boolean handled = event.getDeltaX() > 0 ? navigationService.back() : navigationService.forward();
+            if (handled) {
                 event.consume();
             }
         });
@@ -100,6 +128,15 @@ public class MainView {
 
     public void navigateTo(String fxml) {
         navigationService.visit(ViewState.of(fxml));
+    }
+
+    private boolean allowGestureTrigger() {
+        long now = System.nanoTime();
+        if (now - lastGestureNanos < TOUCH_GESTURE_COOLDOWN_NANOS) {
+            return false;
+        }
+        lastGestureNanos = now;
+        return true;
     }
 
     public void openModal(String fxml) {
