@@ -55,24 +55,11 @@ public class SearchStudentController {
     }
 
     public void handleSearchStudent(ActionEvent actionEvent) {
-        if(imeStudentaTf.getText().isEmpty())
-            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.sviStudenti()));
-        else{
-            Flux<StudentDto> flux = studentService.searchStudentsAsync(imeStudentaTf.getText());
-            //Mono predstavlja 0 ili 1 element.
-            flux.collectList() // pretvara Flux u Mono<List<StudentDto>>
-                    .subscribe(
-                            list -> {
-                                // Ovo se izvršava kada stigne rezultat
-                                tabelaStudenti.setItems(FXCollections.observableArrayList(list));
-                                System.out.println("Rezultat je stigao.");
-                            },
-                            error -> {
-                                System.out.println(error.getMessage());
-                            }
-                    );
-            System.out.println("Nakon search operacije.");
-        }
+        String imeFilter = imeStudentaTf.getText() == null ? "" : imeStudentaTf.getText().trim();
+        Flux<StudentDto> source = imeFilter.isEmpty()
+                ? studentService.fetchAllStudentsAsync()
+                : studentService.searchStudentsAsync(imeFilter);
+        populateStudents(source);
     }
 
     public void handleFindStudentByIndex(ActionEvent actionEvent) {
@@ -103,6 +90,14 @@ public class SearchStudentController {
 
     public void handleOpenSelectedStudentProfile(ActionEvent actionEvent) {
         openSelectedStudentProfile();
+    }
+
+    private void populateStudents(Flux<StudentDto> flux) {
+        flux.collectList()
+                .subscribe(
+                        list -> tabelaStudenti.setItems(FXCollections.observableArrayList(list)),
+                        error -> System.out.println(error.getMessage())
+                );
     }
 
     private void openStudentProfile(StudentDto student, String indeks) {

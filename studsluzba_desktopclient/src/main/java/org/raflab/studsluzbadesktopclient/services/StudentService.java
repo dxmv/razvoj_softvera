@@ -1,6 +1,7 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +33,9 @@ public class StudentService {
 	
 	private final String STUDENT_URL_PATH = "/student";
 	private final String API_STUDENT_PATH = "/api/studenti";
+    private static final int DEFAULT_PAGE_SIZE = 1000;
+    private static final ParameterizedTypeReference<PageResponse<StudentDto>> STUDENT_PAGE_TYPE =
+            new ParameterizedTypeReference<>() {};
 
     private String createURL(String pathEnd) {
 		return baseUrl + STUDENT_URL_PATH + "/" + pathEnd;
@@ -58,14 +63,11 @@ public class StudentService {
 	}
 
 	public Flux<StudentDto> searchStudentsAsync(String ime) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/student/search")
-						.queryParam("ime", ime)
-						.build())
-				.retrieve()
-				.bodyToFlux(StudentDto.class);
+		return fetchStudentPage(API_STUDENT_PATH + "/search", builder -> {
+			if (ime != null && !ime.trim().isEmpty()) {
+				builder.queryParam("ime", ime.trim());
+			}
+		});
 	}
 
 
@@ -77,15 +79,12 @@ public class StudentService {
 		else return null;
 	}
 
+    public Flux<StudentDto> fetchAllStudentsAsync() {
+		return fetchStudentPage(API_STUDENT_PATH, null);
+    }
+
     public List<StudentDto> sviStudenti() {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH)
-						.build())
-				.retrieve()
-				.bodyToFlux(StudentDto.class)
-				.collectList().block();
+		return fetchAllStudentsAsync().collectList().blockOptional().orElse(List.of());
     }
 
 	public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
@@ -168,5 +167,22 @@ public class StudentService {
 						.build(indeks))
 				.retrieve()
 				.bodyToFlux(ObnovaGodineDto.class);
+	}
+
+	private Flux<StudentDto> fetchStudentPage(String path, Consumer<UriBuilder> uriCustomizer) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> {
+					UriBuilder builder = uriBuilder.path(path)
+							.queryParam("page", 0)
+							.queryParam("size", DEFAULT_PAGE_SIZE);
+					if (uriCustomizer != null) {
+						uriCustomizer.accept(builder);
+					}
+					return builder.build();
+				})
+				.retrieve()
+				.bodyToMono(STUDENT_PAGE_TYPE)
+				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
 	}
 }
