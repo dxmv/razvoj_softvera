@@ -24,6 +24,12 @@ public class StudentController {
 
     private final StudentService service;
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Page<StudentDto> getStudents(Pageable pageable){
+        return service.getAll(pageable);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public StudentDto create(@RequestBody StudentDto body) {

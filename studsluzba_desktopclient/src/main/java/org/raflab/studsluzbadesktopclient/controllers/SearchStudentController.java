@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
@@ -30,6 +31,9 @@ public class SearchStudentController {
     @FXML
     private TableView<StudentDto> tabelaStudenti;
 
+    @FXML
+    private Button openProfileButton;
+
     public SearchStudentController(StudentService studentService,
                                    MainView mainView,
                                    SelectedStudentStore selectedStudentStore) {
@@ -45,6 +49,9 @@ public class SearchStudentController {
                 openSelectedStudentProfile();
             }
         });
+        if (openProfileButton != null) {
+            openProfileButton.disableProperty().bind(tabelaStudenti.getSelectionModel().selectedItemProperty().isNull());
+        }
     }
 
     public void handleSearchStudent(ActionEvent actionEvent) {
@@ -92,6 +99,10 @@ public class SearchStudentController {
             return;
         }
         openStudentProfile(selected, null);
+    }
+
+    public void handleOpenSelectedStudentProfile(ActionEvent actionEvent) {
+        openSelectedStudentProfile();
     }
 
     private void openStudentProfile(StudentDto student, String indeks) {

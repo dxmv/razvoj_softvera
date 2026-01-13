@@ -61,7 +61,7 @@ public class StudentService {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
-						.path("/student/pronadji")
+						.path(API_STUDENT_PATH + "/student/search")
 						.queryParam("ime", ime)
 						.build())
 				.retrieve()
@@ -81,7 +81,7 @@ public class StudentService {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
-						.path("/student/all")
+						.path(API_STUDENT_PATH)
 						.build())
 				.retrieve()
 				.bodyToFlux(StudentDto.class)

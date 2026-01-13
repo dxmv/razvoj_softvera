@@ -353,4 +353,7 @@ public class StudentService {
         return List.of(firstSemester, firstSemester + 1);
     }
 
+    public Page<StudentDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable).map(EntityMapper::toDto);
+    }
 }
