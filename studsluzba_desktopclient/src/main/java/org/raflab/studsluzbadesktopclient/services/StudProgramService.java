@@ -5,7 +5,7 @@ import java.util.List;
 
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dtos.StudProgramDTO;
+import org.raflab.studsluzba.model.dto.StudProgramDto;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,9 +22,9 @@ public class StudProgramService {
 		return baseUrl + STUDPROGRAMI_URL_PATH + "/" + type + "/" +pathEnd;
 	}
 	
-	public List<StudProgramDTO> getSudijskiProgramiSorted(){
-		StudProgramDTO[] retVal =
-				restTemplate.getForObject(createURL("all", "sorted"), StudProgramDTO[] .class);
+	public List<StudProgramDto> getSudijskiProgramiSorted(){
+		StudProgramDto[] retVal =
+				restTemplate.getForObject(createURL("all", "sorted"), StudProgramDto[].class);
 
 		if (retVal == null) return null;
 		return Arrays.asList(retVal);

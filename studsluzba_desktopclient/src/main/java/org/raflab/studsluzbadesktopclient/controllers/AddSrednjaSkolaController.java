@@ -11,7 +11,8 @@ import javafx.stage.Stage;
 import org.raflab.studsluzbadesktopclient.coder.CoderFactory;
 import org.raflab.studsluzbadesktopclient.coder.CoderType;
 import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
-import org.raflab.studsluzbadesktopclient.dtos.SrednjaSkolaDTO;
+import org.raflab.studsluzba.model.VrstaSkole;
+import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.raflab.studsluzbadesktopclient.services.SifarniciService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,11 +36,11 @@ public class AddSrednjaSkolaController {
 	
 	
 	@FXML public void addSrednjaSkola(ActionEvent event) {
-		SrednjaSkolaDTO ss = new SrednjaSkolaDTO();
+		SrednjaSkolaDto ss = new SrednjaSkolaDto();
 
 		if(mestoNoveSrednjeSkoleCb.getValue()!=null) ss.setMesto(mestoNoveSrednjeSkoleCb.getValue().toString());
 		ss.setNaziv(nazivNoveSrednjeSkoleTf.getText());
-		if(tipNoveSrednjeSkoleCb.getValue()!=null) ss.setVrstaSkole(tipNoveSrednjeSkoleCb.getValue().toString());
+		ss.setVrsta(resolveVrsta(tipNoveSrednjeSkoleCb.getValue()));
 
 		try{
 			sifarniciService.saveSrednjaSkola(ss);
@@ -54,6 +55,23 @@ public class AddSrednjaSkolaController {
     	public void initialize() {		
 		tipNoveSrednjeSkoleCb.setItems(FXCollections.observableArrayList(coderFactory.getSimpleCoder(CoderType.TIP_SREDNJE_SKOLE).getCodes()));
 		mestoNoveSrednjeSkoleCb.setItems(FXCollections.observableArrayList(coderFactory.getSimpleCoder(CoderType.MESTO).getCodes()));
+	}
+
+	private VrstaSkole resolveVrsta(SimpleCode code) {
+		if (code == null || code.getCode() == null) {
+			return null;
+		}
+		String normalized = code.getCode().trim().toUpperCase();
+		if (normalized.contains("GIM")) {
+			return VrstaSkole.GIMNAZIJA;
+		}
+		if (normalized.contains("STRU")) {
+			return VrstaSkole.STRUCNA;
+		}
+		if (normalized.contains("UMET")) {
+			return VrstaSkole.UMETNICKA;
+		}
+		return VrstaSkole.OSTALO;
 	}
 	
 	private void closeStage(ActionEvent event) {

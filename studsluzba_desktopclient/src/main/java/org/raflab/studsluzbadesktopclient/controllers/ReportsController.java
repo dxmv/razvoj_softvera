@@ -5,7 +5,7 @@ import javafx.scene.control.TextField;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.raflab.studsluzbadesktopclient.MainView;
-import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,7 @@ public class ReportsController {
                 "sviStudentiPoStudProg.pdf" );
     }
 
-    public void generateReport(List<StudentDTO> studenti, String reportPath, String pdfName) throws JRException {
+    public void generateReport(List<StudentDto> studenti, String reportPath, String pdfName) throws JRException {
         JasperReport report = JasperCompileManager.compileReport(MainView.class.getResourceAsStream(reportPath));
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(studenti);
         JasperPrint jp = JasperFillManager.fillReport(report, new HashMap<>(), dataSource);

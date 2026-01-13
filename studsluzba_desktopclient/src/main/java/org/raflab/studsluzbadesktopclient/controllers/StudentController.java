@@ -4,22 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.coder.CoderFactory;
 import org.raflab.studsluzbadesktopclient.coder.CoderType;
 import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
-import org.raflab.studsluzbadesktopclient.dtos.SrednjaSkolaDTO;
-import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
+import org.raflab.studsluzba.model.Pol;
+import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzbadesktopclient.services.SifarniciService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
-import java.util.*;
+import java.util.List;
 
 @Component
 public class StudentController {
@@ -76,7 +72,7 @@ public class StudentController {
     TextField uspehPrijemniTf;
 
     @FXML
-    ComboBox<SrednjaSkolaDTO> srednjaSkolaCb;
+    ComboBox<SrednjaSkolaDto> srednjaSkolaCb;
 
     @FXML Label labelError;
 
@@ -107,7 +103,7 @@ public class StudentController {
         mestoStanovanjaCb.setItems(FXCollections.observableArrayList(coderFactory.getSimpleCoder(CoderType.MESTO).getCodes()));
         mestoStanovanjaCb.setValue(new SimpleCode("Beograd"));
         try {
-            List<SrednjaSkolaDTO> srednjeSkole = sifarniciService.getSrednjeSkole();
+            List<SrednjaSkolaDto> srednjeSkole = sifarniciService.getSrednjeSkole();
             srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkole));
         }catch (Exception e){
             labelError.setText(e.getMessage());
@@ -120,7 +116,7 @@ public class StudentController {
 
     public void updateSrednjeSkole() {
         try{
-            List<SrednjaSkolaDTO> srednjeSkole = sifarniciService.getSrednjeSkole();
+            List<SrednjaSkolaDto> srednjeSkole = sifarniciService.getSrednjeSkole();
             srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkole));
         }catch (Exception e){
             labelError.setText(e.getMessage());
@@ -132,29 +128,49 @@ public class StudentController {
     }
 
     public void handleSaveStudent(ActionEvent event) {
-        StudentDTO studentDTO = new StudentDTO();
+        StudentDto studentDTO = new StudentDto();
 
         studentDTO.setIme(imeTf.getText());
         studentDTO.setPrezime(prezimeTf.getText());
         studentDTO.setSrednjeIme(srednjeImeTf.getText());
-        studentDTO.setPol(muski.isSelected() ? "M" : "Z");
-        studentDTO.setGodinaUpisa(Integer.parseInt(godinaUpisaTf.getText()));
-        studentDTO.setAdresa(adresaTf.getText());
+        studentDTO.setPol(muski.isSelected() ? Pol.MUSKI : Pol.ZENSKI);
         studentDTO.setJmbg(jmbgTf.getText());
-        studentDTO.setDatumRodjenja(
-                Date.from(datumRodjenjaDp.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        studentDTO.setMestoRodjenja(mestoRodjenjaCb.getValue().getCode());
-        studentDTO.setEmailPrivatni(emailPrivatniTf.getText());
-        studentDTO.setEmailFakultet(emailFakultetTf.getText());
+        if (datumRodjenjaDp.getValue() != null) {
+            studentDTO.setDatumRodjenja(datumRodjenjaDp.getValue());
+        }
+        if (mestoRodjenjaCb.getValue() != null) {
+            studentDTO.setMestoRodjenja(mestoRodjenjaCb.getValue().getCode());
+        }
+        studentDTO.setFakultetskiEmail(emailFakultetTf.getText());
+        studentDTO.setPrivatniEmail(emailPrivatniTf.getText());
         studentDTO.setBrojTelefona(brojTelefonaTf.getText());
-        studentDTO.setMestoStanovanja(mestoStanovanjaCb.getValue().getCode());
-
-        studentDTO.setDrzavaRodjenja(drzavaRodjenjaCb.getValue().getCode());
-        studentDTO.setDrzavljanstvo(drzavljanstvoCb.getValue().getCode());
+        if (mestoStanovanjaCb.getValue() != null) {
+            studentDTO.setMestoPrebivalista(mestoStanovanjaCb.getValue().getCode());
+        }
+        studentDTO.setUlicaPrebivalista(adresaTf.getText());
+        studentDTO.setDrzavaRodjenja(drzavaRodjenjaCb.getValue() != null ? drzavaRodjenjaCb.getValue().getCode() : null);
+        studentDTO.setDrzavljanstvo(drzavljanstvoCb.getValue() != null ? drzavljanstvoCb.getValue().getCode() : null);
         studentDTO.setNacionalnost(nacionalnostTf.getText());
+        studentDTO.setBrojLicneKarte(brojLicneKarteTf.getText());
+        SrednjaSkolaDto selectedSkola = srednjaSkolaCb.getValue();
+        studentDTO.setZavrsenaSkolaId(selectedSkola != null ? selectedSkola.getId() : null);
+        studentDTO.setUspehSrednjaSkola(parseDoubleOrNull(uspehSrednjaSkolaTf.getText()));
+        studentDTO.setUspehPrijemni(parseDoubleOrNull(uspehPrijemniTf.getText()));
 
         studentService.saveStudent(studentDTO);
         resetForm();
+    }
+
+    private Double parseDoubleOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException ex) {
+            labelError.setText("Neispravan broj: " + value);
+            return null;
+        }
     }
 
 

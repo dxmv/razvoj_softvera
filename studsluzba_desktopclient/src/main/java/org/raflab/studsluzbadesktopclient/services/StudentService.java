@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -30,16 +30,16 @@ public class StudentService {
 		return baseUrl + STUDENT_URL_PATH + "/" + pathEnd;
 	}
 
-	public List<StudentDTO> searchStudent(String ime) {
+	public List<StudentDto> searchStudent(String ime) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createURL("pronadji"));
 		builder.queryParam("ime", ime);
-		ResponseEntity<StudentDTO[]> response = restTemplate.getForEntity(builder.toUriString(), StudentDTO[].class, HttpMethod.GET);
+		ResponseEntity<StudentDto[]> response = restTemplate.getForEntity(builder.toUriString(), StudentDto[].class, HttpMethod.GET);
 		if(response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
 			return List.of(response.getBody());
 		else return null;
 	}
 
-	public List<StudentDTO> searchStudents(String ime) {
+	public List<StudentDto> searchStudents(String ime) {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
@@ -47,11 +47,11 @@ public class StudentService {
 						.queryParam("ime", ime)
 						.build())
 				.retrieve()
-				.bodyToFlux(StudentDTO.class)
+				.bodyToFlux(StudentDto.class)
 				.collectList().block();
 	}
 
-	public Flux<StudentDTO> searchStudentsAsync(String ime) {
+	public Flux<StudentDto> searchStudentsAsync(String ime) {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
@@ -59,11 +59,11 @@ public class StudentService {
 						.queryParam("ime", ime)
 						.build())
 				.retrieve()
-				.bodyToFlux(StudentDTO.class);
+				.bodyToFlux(StudentDto.class);
 	}
 
 
-	public Integer saveStudent(StudentDTO student) {
+	public Integer saveStudent(StudentDto student) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createURL("add"));
 		ResponseEntity<Integer> response = restTemplate.postForEntity(builder.toUriString(), new HttpEntity<>(student), Integer.class);
 		if(response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
@@ -71,18 +71,18 @@ public class StudentService {
 		else return null;
 	}
 
-    public List<StudentDTO> sviStudenti() {
+    public List<StudentDto> sviStudenti() {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
 						.path("/student/all")
 						.build())
 				.retrieve()
-				.bodyToFlux(StudentDTO.class)
+				.bodyToFlux(StudentDto.class)
 				.collectList().block();
     }
 
-	public List<StudentDTO> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
+	public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
@@ -90,11 +90,11 @@ public class StudentService {
 						.queryParam("godinaUpisa", godinaUpisa)
 						.build())
 				.retrieve()
-				.bodyToFlux(StudentDTO.class)
+				.bodyToFlux(StudentDto.class)
 				.collectList().block();
 	}
 
-	public List<StudentDTO> searchStudentsByStudProg(String studProg) {
+	public List<StudentDto> searchStudentsByStudProg(String studProg) {
 		return webClient
 				.get()
 				.uri(uriBuilder -> uriBuilder
@@ -102,7 +102,7 @@ public class StudentService {
 						.queryParam("studProg", studProg)
 						.build())
 				.retrieve()
-				.bodyToFlux(StudentDTO.class)
+				.bodyToFlux(StudentDto.class)
 				.collectList().block();
 	}
 }

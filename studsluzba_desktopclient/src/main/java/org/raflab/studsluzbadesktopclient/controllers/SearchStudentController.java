@@ -10,7 +10,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Circle;
-import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
+import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -26,7 +26,7 @@ public class SearchStudentController {
     private TextField imeStudentaTf;
 
     @FXML
-    private TableView<StudentDTO> tabelaStudenti;
+    private TableView<StudentDto> tabelaStudenti;
 
     public SearchStudentController(StudentService studentService) {
         this.studentService = studentService;
@@ -36,9 +36,9 @@ public class SearchStudentController {
         if(imeStudentaTf.getText().isEmpty())
             tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.sviStudenti()));
         else{
-            Flux<StudentDTO> flux = studentService.searchStudentsAsync(imeStudentaTf.getText());
+            Flux<StudentDto> flux = studentService.searchStudentsAsync(imeStudentaTf.getText());
             //Mono predstavlja 0 ili 1 element.
-            flux.collectList() // pretvara Flux u Mono<List<StudentDTO>>
+            flux.collectList() // pretvara Flux u Mono<List<StudentDto>>
                     .subscribe(
                             list -> {
                                 // Ovo se izvršava kada stigne rezultat

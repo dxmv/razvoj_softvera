@@ -1,7 +1,7 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dtos.SrednjaSkolaDTO;
+import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,7 +21,7 @@ public class SifarniciService {
 	}
 
 
-	public Integer saveSrednjaSkola(SrednjaSkolaDTO ss) {
+	public Integer saveSrednjaSkola(SrednjaSkolaDto ss) {
 		return webClient.post()
 				.uri(createURL("add"))
 				.contentType(MediaType.APPLICATION_JSON)
@@ -32,13 +32,13 @@ public class SifarniciService {
 	}
 
 
-	public List<SrednjaSkolaDTO> getSrednjeSkole() throws Exception{
+	public List<SrednjaSkolaDto> getSrednjeSkole() throws Exception{
 
 		return webClient.get()
 				.uri(createURL("all"))
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToFlux(SrednjaSkolaDTO.class)
+				.bodyToFlux(SrednjaSkolaDto.class)
 				.collectList()
 				.block();
 	}
