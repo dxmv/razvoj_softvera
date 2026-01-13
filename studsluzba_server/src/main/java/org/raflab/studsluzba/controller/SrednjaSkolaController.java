@@ -6,12 +6,19 @@ import org.raflab.studsluzba.service.SrednjaSkolaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/srednje-skole")
 @RequiredArgsConstructor
 public class SrednjaSkolaController {
 
     private final SrednjaSkolaService service;
+
+    @GetMapping
+    public List<SrednjaSkola> findAll() {
+        return service.findAll();
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

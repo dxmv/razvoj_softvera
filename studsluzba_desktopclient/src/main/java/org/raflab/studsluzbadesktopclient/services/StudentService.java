@@ -92,6 +92,22 @@ public class StudentService {
 		});
     }
 
+    public List<StudentDto> findStudentsByHighSchool(Long srednjaSkolaId) {
+		if (srednjaSkolaId == null) {
+			return List.of();
+		}
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-high-school/{id}")
+						.build(srednjaSkolaId))
+				.retrieve()
+				.bodyToFlux(StudentDto.class)
+				.collectList()
+				.blockOptional()
+				.orElse(List.of());
+    }
+
 	public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
 		return webClient
 				.get()

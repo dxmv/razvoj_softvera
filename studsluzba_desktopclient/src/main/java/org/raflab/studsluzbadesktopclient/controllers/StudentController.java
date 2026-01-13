@@ -11,7 +11,7 @@ import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
 import org.raflab.studsluzba.model.Pol;
 import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
-import org.raflab.studsluzbadesktopclient.services.SifarniciService;
+import org.raflab.studsluzbadesktopclient.services.SkoleService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class StudentController {
     private final StudentService studentService;
     private final CoderFactory coderFactory;
     private final MainView mainView;
-    private final SifarniciService sifarniciService;
+    private final SkoleService skoleService;
     @FXML
     private TextField imeTf;
     @FXML
@@ -82,11 +82,11 @@ public class StudentController {
 //    @FXML
 //    ComboBox<VisokoskolskaUstanova> visokoskolskaUstanovaCb;
 
-    public StudentController(StudentService studentService, CoderFactory coderFactory, MainView mainView, SifarniciService sifarniciService) {
+    public StudentController(StudentService studentService, CoderFactory coderFactory, MainView mainView, SkoleService skoleService) {
         this.studentService = studentService;
         this.coderFactory = coderFactory;
         this.mainView = mainView;
-        this.sifarniciService = sifarniciService;
+        this.skoleService = skoleService;
     }
 
     @FXML
@@ -103,7 +103,7 @@ public class StudentController {
         mestoStanovanjaCb.setItems(FXCollections.observableArrayList(coderFactory.getSimpleCoder(CoderType.MESTO).getCodes()));
         mestoStanovanjaCb.setValue(new SimpleCode("Beograd"));
         try {
-            List<SrednjaSkolaDto> srednjeSkole = sifarniciService.getSrednjeSkole();
+            List<SrednjaSkolaDto> srednjeSkole = skoleService.getSrednjeSkole();
             srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkole));
         }catch (Exception e){
             labelError.setText(e.getMessage());
@@ -116,7 +116,7 @@ public class StudentController {
 
     public void updateSrednjeSkole() {
         try{
-            List<SrednjaSkolaDto> srednjeSkole = sifarniciService.getSrednjeSkole();
+            List<SrednjaSkolaDto> srednjeSkole = skoleService.getSrednjeSkole();
             srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkole));
         }catch (Exception e){
             labelError.setText(e.getMessage());

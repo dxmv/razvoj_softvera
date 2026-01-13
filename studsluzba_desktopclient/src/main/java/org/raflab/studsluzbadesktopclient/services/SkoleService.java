@@ -3,27 +3,23 @@ package org.raflab.studsluzbadesktopclient.services;
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
 
-@RestController
+@Service
 @AllArgsConstructor
-public class SifarniciService {
+public class SkoleService {
 
 	private WebClient webClient;
 	private String baseUrl;
 
-	private final String SKOLA_URL_PATH = "/srednja-skola";
-
-	private String createURL(String pathEnd) {
-		return baseUrl + SKOLA_URL_PATH + "/" + pathEnd;
-	}
+	private static final String SKOLA_URL_PATH = "/api/srednje-skole";
 
 
 	public Integer saveSrednjaSkola(SrednjaSkolaDto ss) {
 		return webClient.post()
-				.uri(createURL("add"))
+				.uri(baseUrl + SKOLA_URL_PATH)
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(ss)
 				.retrieve()
@@ -35,7 +31,7 @@ public class SifarniciService {
 	public List<SrednjaSkolaDto> getSrednjeSkole() throws Exception{
 
 		return webClient.get()
-				.uri(createURL("all"))
+				.uri(baseUrl + SKOLA_URL_PATH)
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToFlux(SrednjaSkolaDto.class)
