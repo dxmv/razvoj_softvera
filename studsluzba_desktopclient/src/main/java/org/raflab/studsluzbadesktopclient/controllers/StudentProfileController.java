@@ -139,21 +139,11 @@ public class StudentProfileController {
         this.activeStudentId = student.getId();
         updateBasicInfo(selection);
         loadPayments(activeStudentId);
-        if (activeIndex == null || activeIndex.isBlank()) {
-            showMessage(passedExamsMessageLabel, "Unesite broj indeksa da biste prikazali ispite.");
-            showMessage(failedExamsMessageLabel, "Unesite broj indeksa da biste prikazali ispite.");
-            showMessage(enrollmentsMessageLabel, "Unesite broj indeksa da biste prikazali upisane godine.");
-            showMessage(repeatedYearsMessageLabel, "Unesite broj indeksa da biste prikazali obnove.");
-            passedExams.clear();
-            failedExams.clear();
-            enrollments.clear();
-            repeatedYears.clear();
-            return;
+        if (hasIndex(activeIndex)) {
+            loadIndexBoundData(activeIndex);
+        } else {
+            requestIndexForStudent(student);
         }
-        loadPassedExams(activeIndex);
-        loadFailedExams(activeIndex);
-        loadEnrollments(activeIndex);
-        loadRepeatedYears(activeIndex);
     }
 
     private void loadPassedExams(String index) {
@@ -273,9 +263,7 @@ public class StudentProfileController {
     private void updateBasicInfo(Selection selection) {
         StudentDto student = selection.getStudent();
         String indeks = selection.getIndex();
-        statusLabel.setText(indeks != null && !indeks.isBlank()
-                ? "Profil studenta za indeks " + indeks
-                : "Profil studenta");
+        updateStatusForIndex(indeks);
         indeksValue.setText(valueOrPlaceholder(indeks));
         imeValue.setText(valueOrPlaceholder(student.getIme()));
         prezimeValue.setText(valueOrPlaceholder(student.getPrezime()));
@@ -325,6 +313,89 @@ public class StudentProfileController {
         showMessage(enrollmentsMessageLabel, "");
         showMessage(repeatedYearsMessageLabel, "");
         updateRemainingTuitionLabels(null);
+    }
+
+    private void loadIndexBoundData(String index) {
+        if (!hasIndex(index)) {
+            showMissingIndexMessages(null);
+            return;
+        }
+        loadPassedExams(index);
+        loadFailedExams(index);
+        loadEnrollments(index);
+        loadRepeatedYears(index);
+    }
+
+    private void requestIndexForStudent(StudentDto student) {
+        if (student == null || student.getId() == null) {
+            showMissingIndexMessages("Broj indeksa nije poznat. Otvorite profil unosom broja indeksa.");
+            return;
+        }
+        showIndexLoadingMessage();
+        studentService.findActiveIndexValue(student.getId())
+                .subscribe(index -> runOnFx(() -> handleIndexResolved(student.getId(), index)),
+                        error -> runOnFx(() -> handleIndexLookupError(student.getId(), error)));
+    }
+
+    private void handleIndexResolved(Long studentId, String index) {
+        if (!studentId.equals(activeStudentId)) {
+            return;
+        }
+        if (!hasIndex(index)) {
+            showMissingIndexMessages("Aktivan indeks nije pronađen. Otvorite profil unosom broja indeksa.");
+            return;
+        }
+        this.activeIndex = index;
+        indeksValue.setText(valueOrPlaceholder(index));
+        updateStatusForIndex(index);
+        loadIndexBoundData(index);
+    }
+
+    private void handleIndexLookupError(Long studentId, Throwable error) {
+        if (!studentId.equals(activeStudentId)) {
+            return;
+        }
+        String message = error == null || error.getMessage() == null
+                ? "Greška pri pronalaženju broja indeksa."
+                : "Greška pri pronalaženju broja indeksa: " + error.getMessage();
+        showMissingIndexMessages(message);
+    }
+
+    private void showIndexLoadingMessage() {
+        String message = "Učitavanje broja indeksa...";
+        showMessage(passedExamsMessageLabel, message);
+        showMessage(failedExamsMessageLabel, message);
+        showMessage(enrollmentsMessageLabel, message);
+        showMessage(repeatedYearsMessageLabel, message);
+        passedExams.clear();
+        failedExams.clear();
+        enrollments.clear();
+        repeatedYears.clear();
+    }
+
+    private void showMissingIndexMessages(String customMessage) {
+        String message = customMessage != null ? customMessage
+                : "Broj indeksa nije poznat. Otvorite profil unosom broja indeksa.";
+        showMessage(passedExamsMessageLabel, message);
+        showMessage(failedExamsMessageLabel, message);
+        showMessage(enrollmentsMessageLabel, message);
+        showMessage(repeatedYearsMessageLabel, message);
+        passedExams.clear();
+        failedExams.clear();
+        enrollments.clear();
+        repeatedYears.clear();
+    }
+
+    private boolean hasIndex(String index) {
+        return index != null && !index.isBlank();
+    }
+
+    private void updateStatusForIndex(String indeks) {
+        if (statusLabel != null) {
+            statusLabel.setText(hasIndex(indeks)
+                    ? "Profil studenta za indeks " + indeks
+                    : "Profil studenta");
+        }
     }
 
     private void updateRemainingTuitionLabels(RemainingTuitionDto dto) {

@@ -146,6 +146,19 @@ public class StudentService {
 		return findStudentByIndexAsync(indeks).block();
 	}
 
+	public Mono<String> findActiveIndexValue(Long studentId) {
+		if (studentId == null) {
+			return Mono.error(new IllegalArgumentException("studentId is required"));
+		}
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/{id}/active-index")
+						.build(studentId))
+				.retrieve()
+				.bodyToMono(String.class);
+	}
+
 	public Flux<PolozenPredmetDto> findPassedExams(String indeks) {
 		return webClient
 				.get()

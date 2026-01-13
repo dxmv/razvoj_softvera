@@ -1,7 +1,9 @@
 package org.raflab.studsluzba.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Indeks;
+import org.raflab.studsluzba.model.StatusIndeksa;
 import org.raflab.studsluzba.repositories.StudentskiIndeksRepository;
 import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.http.HttpStatus;
@@ -48,5 +50,19 @@ public class IndeksService {
         } catch (NumberFormatException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid indeks numeric format: " + indeks, ex);
         }
+    }
+
+    public Optional<Indeks> findActiveForStudent(Long studentId) {
+        if (studentId == null) {
+            return Optional.empty();
+        }
+        return repository.findFirstByStudentIdAndStatusOrderByDatumAktivacijeDesc(studentId, StatusIndeksa.AKTIVAN);
+    }
+
+    public Optional<Indeks> findLatestForStudent(Long studentId) {
+        if (studentId == null) {
+            return Optional.empty();
+        }
+        return repository.findFirstByStudentIdOrderByDatumAktivacijeDesc(studentId);
     }
 }

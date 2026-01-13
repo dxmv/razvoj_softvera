@@ -41,6 +41,12 @@ public class StudentController {
         return service.findById(id);
     }
 
+    @GetMapping("/{id}/active-index")
+    @ResponseStatus(HttpStatus.OK)
+    public String findActiveIndexValue(@PathVariable Long id) {
+        return service.findActiveIndexValue(id);
+    }
+
     @PutMapping("/{id}")
     public StudentDto update(@PathVariable Long id, @RequestBody StudentDto body) {
         return service.update(id, body);
