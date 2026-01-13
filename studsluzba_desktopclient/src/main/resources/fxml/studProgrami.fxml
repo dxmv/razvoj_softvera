@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.raflab.studsluzbadesktopclient.controllers.StudProgramiController">
+    <top>
+        <fx:include source="menuBar.fxml"/>
+    </top>
+    <center>
+        <VBox spacing="10">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Studijski programi" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <TableView fx:id="tabelaProgrami" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="oznakaCol" text="Oznaka" prefWidth="100"/>
+                    <TableColumn fx:id="nazivCol" text="Naziv" prefWidth="250"/>
+                    <TableColumn fx:id="zvanjeCol" text="Zvanje" prefWidth="200"/>
+                    <TableColumn fx:id="espbCol" text="ESPB" prefWidth="80"/>
+                </columns>
+            </TableView>
+            <Button text="Osveži" onAction="#loadData"/>
+        </VBox>
+    </center>
+</BorderPane>

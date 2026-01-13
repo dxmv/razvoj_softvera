@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.raflab.studsluzbadesktopclient.controllers.PredmetiPoProgramuController">
+    <top>
+        <fx:include source="menuBar.fxml"/>
+    </top>
+    <center>
+        <VBox spacing="15">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Izaberite studijski program:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="programComboBox" prefWidth="300" promptText="---"/>
+            </HBox>
+
+            <Separator/>
+
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Predmeti na programu" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Button text="Dodaj novi predmet" onAction="#handleDodajPredmet"
+                        fx:id="btnDodaj" disable="true" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+            </HBox>
+
+            <TableView fx:id="tabelaPredmeti" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="sifraCol" text="Šifra" prefWidth="100"/>
+                    <TableColumn fx:id="nazivCol" text="Naziv predmeta" prefWidth="300"/>
+                    <TableColumn fx:id="espbCol" text="ESPB" prefWidth="100"/>
+                    <TableColumn fx:id="semestarCol" text="Semestar" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

@@ -32,8 +32,8 @@
             </Menu>
             <Menu text="Predmeti">
                 <items>
-                	<MenuItem text="Studijski programi" />                                   
-                    <MenuItem text="Predmeti" />                  
+                    <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami" />
+                    <MenuItem text="Predmeti" onAction="#openPredmetiPoProgramu"/>
                 </items>                          
             </Menu>
             <Menu text="Nastava i ispiti">

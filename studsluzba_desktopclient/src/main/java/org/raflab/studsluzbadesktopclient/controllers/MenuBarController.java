@@ -37,6 +37,9 @@ public class MenuBarController {
 		mainView.navigateTo("reports");
 	}
 
+	public void openStudijskiProgrami() {mainView.navigateTo("studProgrami");}
+
+	public void openPredmetiPoProgramu() {mainView.navigateTo("predmetiPoProgramu");}
 	@FXML
     public void initialize() {		
 
