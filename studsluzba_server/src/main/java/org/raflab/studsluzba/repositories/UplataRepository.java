@@ -8,4 +8,6 @@ import java.util.List;
 public interface UplataRepository extends JpaRepository<Uplata, Long> {
 
     List<Uplata> findByStudentIdAndSkolskaGodinaId(Long studentId, Long skolskaGodinaId);
+
+    List<Uplata> findByStudentIdOrderByDatumUplateDesc(Long studentId);
 }

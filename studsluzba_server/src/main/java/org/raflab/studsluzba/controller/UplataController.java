@@ -35,6 +35,11 @@ public class UplataController {
         return service.createWithCurrentRate(studentId, request);
     }
 
+    @GetMapping("/student/{studentId}")
+    public java.util.List<UplataDto> findByStudent(@PathVariable Long studentId) {
+        return service.findByStudent(studentId);
+    }
+
     @GetMapping("/student/{studentId}/balance")
     public RemainingTuitionDto remainingTuition(@PathVariable Long studentId) {
         return service.getRemainingTuition(studentId);

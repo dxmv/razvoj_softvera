@@ -3,7 +3,13 @@ package org.raflab.studsluzbadesktopclient.services;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
+import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
+import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
+import org.raflab.studsluzba.model.dto.UpisGodineDto;
+import org.raflab.studsluzbadesktopclient.utils.PageResponse;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -24,6 +30,7 @@ public class StudentService {
 	private String baseUrl;
 	
 	private final String STUDENT_URL_PATH = "/student";
+	private final String API_STUDENT_PATH = "/api/studenti";
 
     private String createURL(String pathEnd) {
 		return baseUrl + STUDENT_URL_PATH + "/" + pathEnd;
@@ -117,5 +124,49 @@ public class StudentService {
 
 	public StudentDto findStudentByIndex(String indeks) {
 		return findStudentByIndexAsync(indeks).block();
+	}
+
+	public Flux<PolozenPredmetDto> findPassedExams(String indeks) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/passed")
+						.queryParam("size", 1000)
+						.build(indeks))
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<PageResponse<PolozenPredmetDto>>() {})
+				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
+	}
+
+	public Flux<PredmetDto> findFailedExams(String indeks) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/failed")
+						.queryParam("size", 1000)
+						.build(indeks))
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<PageResponse<PredmetDto>>() {})
+				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
+	}
+
+	public Flux<UpisGodineDto> findEnrolledYears(String indeks) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/enrolled")
+						.build(indeks))
+				.retrieve()
+				.bodyToFlux(UpisGodineDto.class);
+	}
+
+	public Flux<ObnovaGodineDto> findRepeatedYears(String indeks) {
+		return webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/repeated")
+						.build(indeks))
+				.retrieve()
+				.bodyToFlux(ObnovaGodineDto.class);
 	}
 }

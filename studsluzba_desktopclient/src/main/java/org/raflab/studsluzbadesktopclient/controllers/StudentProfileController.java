@@ -1,8 +1,20 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
+import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
+import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
+import org.raflab.studsluzba.model.dto.PredmetDto;
+import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
+import org.raflab.studsluzba.model.dto.UpisGodineDto;
+import org.raflab.studsluzba.model.dto.UplataDto;
+import org.raflab.studsluzbadesktopclient.services.PaymentService;
+import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore;
 import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore.Selection;
 import org.springframework.stereotype.Component;
@@ -11,6 +23,17 @@ import org.springframework.stereotype.Component;
 public class StudentProfileController {
 
     private final SelectedStudentStore selectedStudentStore;
+    private final StudentService studentService;
+    private final PaymentService paymentService;
+
+    private final ObservableList<PolozenPredmetDto> passedExams = FXCollections.observableArrayList();
+    private final ObservableList<PredmetDto> failedExams = FXCollections.observableArrayList();
+    private final ObservableList<UplataDto> payments = FXCollections.observableArrayList();
+    private final ObservableList<UpisGodineDto> enrollments = FXCollections.observableArrayList();
+    private final ObservableList<ObnovaGodineDto> repeatedYears = FXCollections.observableArrayList();
+
+    private String activeIndex;
+    private Long activeStudentId;
 
     @FXML
     private Label statusLabel;
@@ -47,28 +70,212 @@ public class StudentProfileController {
     @FXML
     private Label privatniEmailValue;
 
-    public StudentProfileController(SelectedStudentStore selectedStudentStore) {
+    @FXML
+    private TableView<PolozenPredmetDto> passedExamsTable;
+    @FXML
+    private Label passedExamsMessageLabel;
+    @FXML
+    private TableView<PredmetDto> failedExamsTable;
+    @FXML
+    private Label failedExamsMessageLabel;
+    @FXML
+    private TableView<UplataDto> paymentsTable;
+    @FXML
+    private Label paymentsMessageLabel;
+    @FXML
+    private Label remainingEurLabel;
+    @FXML
+    private Label remainingRsdLabel;
+    @FXML
+    private TableView<UpisGodineDto> enrollmentsTable;
+    @FXML
+    private Label enrollmentsMessageLabel;
+    @FXML
+    private TableView<ObnovaGodineDto> repeatedYearsTable;
+    @FXML
+    private Label repeatedYearsMessageLabel;
+
+    public StudentProfileController(SelectedStudentStore selectedStudentStore,
+                                    StudentService studentService,
+                                    PaymentService paymentService) {
         this.selectedStudentStore = selectedStudentStore;
+        this.studentService = studentService;
+        this.paymentService = paymentService;
     }
 
     @FXML
     public void initialize() {
-        selectedStudentStore.selectionProperty()
-                .addListener((obs, oldSelection, newSelection) -> updateProfile(newSelection));
-        updateProfile(selectedStudentStore.getSelection());
+        if (passedExamsTable != null) {
+            passedExamsTable.setItems(passedExams);
+        }
+        if (failedExamsTable != null) {
+            failedExamsTable.setItems(failedExams);
+        }
+        if (paymentsTable != null) {
+            paymentsTable.setItems(payments);
+        }
+        if (enrollmentsTable != null) {
+            enrollmentsTable.setItems(enrollments);
+        }
+        if (repeatedYearsTable != null) {
+            repeatedYearsTable.setItems(repeatedYears);
+        }
+        selectedStudentStore.selectionProperty().addListener((obs, oldSelection, newSelection) ->
+                applySelection(newSelection));
+        applySelection(selectedStudentStore.getSelection());
     }
 
-    private void updateProfile(Selection selection) {
+    private void applySelection(Selection selection) {
         if (selection == null || selection.getStudent() == null) {
             statusLabel.setText("Nijedan student nije izabran. Pronađite studenta unosom broja indeksa.");
-            clearLabels();
+            activeIndex = null;
+            activeStudentId = null;
+            clearBasicInfo();
+            clearDataViews();
             return;
         }
         StudentDto student = selection.getStudent();
+        this.activeIndex = selection.getIndex();
+        this.activeStudentId = student.getId();
+        updateBasicInfo(selection);
+        loadPayments(activeStudentId);
+        if (activeIndex == null || activeIndex.isBlank()) {
+            showMessage(passedExamsMessageLabel, "Unesite broj indeksa da biste prikazali ispite.");
+            showMessage(failedExamsMessageLabel, "Unesite broj indeksa da biste prikazali ispite.");
+            showMessage(enrollmentsMessageLabel, "Unesite broj indeksa da biste prikazali upisane godine.");
+            showMessage(repeatedYearsMessageLabel, "Unesite broj indeksa da biste prikazali obnove.");
+            passedExams.clear();
+            failedExams.clear();
+            enrollments.clear();
+            repeatedYears.clear();
+            return;
+        }
+        loadPassedExams(activeIndex);
+        loadFailedExams(activeIndex);
+        loadEnrollments(activeIndex);
+        loadRepeatedYears(activeIndex);
+    }
+
+    private void loadPassedExams(String index) {
+        showMessage(passedExamsMessageLabel, "Učitavanje...");
+        studentService.findPassedExams(index)
+                .collectList()
+                .subscribe(list -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    passedExams.setAll(list);
+                    showMessage(passedExamsMessageLabel, list.isEmpty() ? "Nema evidentiranih položenih ispita." : "");
+                }), error -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    passedExams.clear();
+                    showMessage(passedExamsMessageLabel, "Greška: " + error.getMessage());
+                }));
+    }
+
+    private void loadFailedExams(String index) {
+        showMessage(failedExamsMessageLabel, "Učitavanje...");
+        studentService.findFailedExams(index)
+                .collectList()
+                .subscribe(list -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    failedExams.setAll(list);
+                    showMessage(failedExamsMessageLabel, list.isEmpty() ? "Nema nepoloženih ispita." : "");
+                }), error -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    failedExams.clear();
+                    showMessage(failedExamsMessageLabel, "Greška: " + error.getMessage());
+                }));
+    }
+
+    private void loadEnrollments(String index) {
+        showMessage(enrollmentsMessageLabel, "Učitavanje...");
+        studentService.findEnrolledYears(index)
+                .collectList()
+                .subscribe(list -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    enrollments.setAll(list);
+                    showMessage(enrollmentsMessageLabel, list.isEmpty() ? "Nema upisanih godina." : "");
+                }), error -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    enrollments.clear();
+                    showMessage(enrollmentsMessageLabel, "Greška: " + error.getMessage());
+                }));
+    }
+
+    private void loadRepeatedYears(String index) {
+        showMessage(repeatedYearsMessageLabel, "Učitavanje...");
+        studentService.findRepeatedYears(index)
+                .collectList()
+                .subscribe(list -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    repeatedYears.setAll(list);
+                    showMessage(repeatedYearsMessageLabel, list.isEmpty() ? "Nema obnovljenih godina." : "");
+                }), error -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    repeatedYears.clear();
+                    showMessage(repeatedYearsMessageLabel, "Greška: " + error.getMessage());
+                }));
+    }
+
+    private void loadPayments(Long studentId) {
+        if (studentId == null) {
+            payments.clear();
+            showMessage(paymentsMessageLabel, "ID studenta nije dostupan za prikaz uplata.");
+            updateRemainingTuitionLabels(null);
+            return;
+        }
+        showMessage(paymentsMessageLabel, "Učitavanje...");
+        paymentService.findPaymentsForStudent(studentId)
+                .collectList()
+                .subscribe(list -> runOnFx(() -> {
+                    if (!studentId.equals(activeStudentId)) {
+                        return;
+                    }
+                    payments.setAll(list);
+                    showMessage(paymentsMessageLabel, list.isEmpty() ? "Nema evidentiranih uplata." : "");
+                }), error -> runOnFx(() -> {
+                    if (!studentId.equals(activeStudentId)) {
+                        return;
+                    }
+                    payments.clear();
+                    showMessage(paymentsMessageLabel, "Greška: " + error.getMessage());
+                }));
+        paymentService.getRemainingTuition(studentId)
+                .subscribe(dto -> runOnFx(() -> {
+                    if (!studentId.equals(activeStudentId)) {
+                        return;
+                    }
+                    updateRemainingTuitionLabels(dto);
+                }), error -> runOnFx(() -> {
+                    if (!studentId.equals(activeStudentId)) {
+                        return;
+                    }
+                    updateRemainingTuitionLabels(null);
+                    showMessage(paymentsMessageLabel, "Greška: " + error.getMessage());
+                }));
+    }
+
+    private void updateBasicInfo(Selection selection) {
+        StudentDto student = selection.getStudent();
         String indeks = selection.getIndex();
-        statusLabel.setText(indeks != null ?
-                "Profil studenta za indeks " + indeks :
-                "Profil studenta");
+        statusLabel.setText(indeks != null && !indeks.isBlank()
+                ? "Profil studenta za indeks " + indeks
+                : "Profil studenta");
         indeksValue.setText(valueOrPlaceholder(indeks));
         imeValue.setText(valueOrPlaceholder(student.getIme()));
         prezimeValue.setText(valueOrPlaceholder(student.getPrezime()));
@@ -81,15 +288,13 @@ public class StudentProfileController {
         drzavljanstvoValue.setText(valueOrPlaceholder(student.getDrzavljanstvo()));
         nacionalnostValue.setText(valueOrPlaceholder(student.getNacionalnost()));
         mestoPrebivalistaValue.setText(valueOrPlaceholder(student.getMestoPrebivalista()));
-        String broj = valueOrPlaceholder(student.getBrojPrebivalista());
-        String ulica = valueOrPlaceholder(student.getUlicaPrebivalista());
-        adresaValue.setText(formatAddress(ulica, broj));
+        adresaValue.setText(formatAddress(student.getUlicaPrebivalista(), student.getBrojPrebivalista()));
         brojTelefonaValue.setText(valueOrPlaceholder(student.getBrojTelefona()));
         fakultetskiEmailValue.setText(valueOrPlaceholder(student.getFakultetskiEmail()));
         privatniEmailValue.setText(valueOrPlaceholder(student.getPrivatniEmail()));
     }
 
-    private void clearLabels() {
+    private void clearBasicInfo() {
         indeksValue.setText("--");
         imeValue.setText("--");
         prezimeValue.setText("--");
@@ -108,6 +313,36 @@ public class StudentProfileController {
         privatniEmailValue.setText("--");
     }
 
+    private void clearDataViews() {
+        passedExams.clear();
+        failedExams.clear();
+        payments.clear();
+        enrollments.clear();
+        repeatedYears.clear();
+        showMessage(passedExamsMessageLabel, "");
+        showMessage(failedExamsMessageLabel, "");
+        showMessage(paymentsMessageLabel, "");
+        showMessage(enrollmentsMessageLabel, "");
+        showMessage(repeatedYearsMessageLabel, "");
+        updateRemainingTuitionLabels(null);
+    }
+
+    private void updateRemainingTuitionLabels(RemainingTuitionDto dto) {
+        if (dto == null) {
+            remainingEurLabel.setText("--");
+            remainingRsdLabel.setText("--");
+            return;
+        }
+        remainingEurLabel.setText(dto.getPreostaloEur() != null ? dto.getPreostaloEur().toPlainString() : "--");
+        remainingRsdLabel.setText(dto.getPreostaloRsd() != null ? dto.getPreostaloRsd().toPlainString() : "--");
+    }
+
+    private void showMessage(Label label, String message) {
+        if (label != null) {
+            label.setText(message == null ? "" : message);
+        }
+    }
+
     private String valueOrPlaceholder(Object value) {
         if (value == null) {
             return "--";
@@ -117,15 +352,28 @@ public class StudentProfileController {
     }
 
     private String formatAddress(String ulica, String broj) {
-        if ((ulica == null || ulica.equals("--")) && (broj == null || broj.equals("--"))) {
+        String ulicaValue = valueOrPlaceholder(ulica);
+        String brojValue = valueOrPlaceholder(broj);
+        if ("--".equals(ulicaValue) && "--".equals(brojValue)) {
             return "--";
         }
-        if (broj == null || broj.equals("--")) {
-            return ulica;
+        if ("--".equals(ulicaValue)) {
+            return brojValue;
         }
-        if (ulica == null || ulica.equals("--")) {
-            return broj;
+        if ("--".equals(brojValue)) {
+            return ulicaValue;
         }
-        return ulica + " " + broj;
+        return ulicaValue + " " + brojValue;
+    }
+
+    private void runOnFx(Runnable action) {
+        if (action == null) {
+            return;
+        }
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+        } else {
+            Platform.runLater(action);
+        }
     }
 }
