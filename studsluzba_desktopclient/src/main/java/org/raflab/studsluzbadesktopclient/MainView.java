@@ -139,15 +139,15 @@ public class MainView {
         return true;
     }
 
-    public void openModal(String fxml) {
-        openModal(fxml, null, 400, 300);
+    public Stage openModal(String fxml) {
+        return openModal(fxml, null, 400, 300);
     }
 
-    public void openModal(String fxml, String title) {
-        openModal(fxml, title, 400, 300);
+    public Stage openModal(String fxml, String title) {
+        return openModal(fxml, title, 400, 300);
     }
 
-    public void openModal(String fxml, String title, int width, int height) {
+    public Stage openModal(String fxml, String title, int width, int height) {
         FXMLLoader loader = appFXMLLoader.getLoader(MainView.class.getResource("/fxml/" + fxml + ".fxml"));
         try {
             Parent parent = loader.load();
@@ -158,9 +158,16 @@ public class MainView {
             }
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(modalScene);
+            
+            // Store controller in stage user data
+            Object controller = loader.getController();
+            stage.setUserData(controller);
+            
             stage.showAndWait();
+            return stage;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

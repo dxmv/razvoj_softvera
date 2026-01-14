@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.stage.Stage;
 import net.sf.jasperreports.engine.JRException;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
@@ -14,6 +15,7 @@ import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
+import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.model.reports.EnrollmentCertificateData;
 import org.raflab.studsluzbadesktopclient.model.reports.ExamByYearGroup;
 import org.raflab.studsluzbadesktopclient.model.reports.ExamDetails;
@@ -39,6 +41,7 @@ public class StudentProfileController {
     private final PaymentService paymentService;
     private final PredmetService predmetService;
     private final CertificateService certificateService;
+    private final MainView mainView;
 
     private final ObservableList<PolozenPredmetDto> passedExams = FXCollections.observableArrayList();
     private final ObservableList<PredmetDto> failedExams = FXCollections.observableArrayList();
@@ -111,12 +114,14 @@ public class StudentProfileController {
                                     StudentService studentService,
                                     PaymentService paymentService,
                                     PredmetService predmetService,
-                                    CertificateService certificateService) {
+                                    CertificateService certificateService,
+                                    MainView mainView) {
         this.selectedStudentStore = selectedStudentStore;
         this.studentService = studentService;
         this.paymentService = paymentService;
         this.predmetService = predmetService;
         this.certificateService = certificateService;
+        this.mainView = mainView;
     }
 
     @FXML
@@ -603,5 +608,41 @@ public class StudentProfileController {
                                 }
                             }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju predmeta: " + error.getMessage())));
                 }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju položenih ispita: " + error.getMessage())));
+    }
+
+    @FXML
+    public void handleOpenPaymentModal() {
+        if (activeStudentId == null) {
+            showMessage(statusLabel, "Nema izabranog studenta. Molimo izaberite studenta.");
+            return;
+        }
+
+        try {
+            Stage modalStage = mainView.openModal("addUplata");
+            if (modalStage != null) {
+                // Get the controller and set student ID
+                Object controller = modalStage.getUserData();
+                if (controller instanceof AddUplataController) {
+                    AddUplataController uplataController = (AddUplataController) controller;
+                    uplataController.setStudentId(activeStudentId);
+                    uplataController.setProfileController(this);
+                }
+            }
+        } catch (Exception e) {
+            showMessage(statusLabel, "Greška pri otvaranju forme za uplatu: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void refreshPaymentsData() {
+        if (activeStudentId == null) {
+            return;
+        }
+        
+        // Reload payments
+        loadPayments(activeStudentId);
+        
+        // Show success message
+        runOnFx(() -> showMessage(statusLabel, "Uplata uspešno evidentirana. Podaci osveženi."));
     }
 }

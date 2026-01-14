@@ -34,6 +34,7 @@
                 </padding>
                 <Button text="Generiši uverenje o studiranju" onAction="#handleGenerateEnrollmentCertificate" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
                 <Button text="Generiši uverenje o položenim ispitima" onAction="#handleGeneratePassedExamsCertificate" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
+                <Button text="Nova uplata" onAction="#handleOpenPaymentModal" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
             </HBox>
             <TabPane prefHeight="600.0" tabClosingPolicy="UNAVAILABLE">
                 <tabs>
