@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import net.sf.jasperreports.engine.JRException;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
@@ -13,11 +14,22 @@ import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
+import org.raflab.studsluzbadesktopclient.model.reports.EnrollmentCertificateData;
+import org.raflab.studsluzbadesktopclient.model.reports.ExamByYearGroup;
+import org.raflab.studsluzbadesktopclient.model.reports.ExamDetails;
+import org.raflab.studsluzbadesktopclient.model.reports.PassedExamCertificateData;
+import org.raflab.studsluzbadesktopclient.services.CertificateService;
 import org.raflab.studsluzbadesktopclient.services.PaymentService;
+import org.raflab.studsluzbadesktopclient.services.PredmetService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore;
 import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore.Selection;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class StudentProfileController {
@@ -25,6 +37,8 @@ public class StudentProfileController {
     private final SelectedStudentStore selectedStudentStore;
     private final StudentService studentService;
     private final PaymentService paymentService;
+    private final PredmetService predmetService;
+    private final CertificateService certificateService;
 
     private final ObservableList<PolozenPredmetDto> passedExams = FXCollections.observableArrayList();
     private final ObservableList<PredmetDto> failedExams = FXCollections.observableArrayList();
@@ -95,10 +109,14 @@ public class StudentProfileController {
 
     public StudentProfileController(SelectedStudentStore selectedStudentStore,
                                     StudentService studentService,
-                                    PaymentService paymentService) {
+                                    PaymentService paymentService,
+                                    PredmetService predmetService,
+                                    CertificateService certificateService) {
         this.selectedStudentStore = selectedStudentStore;
         this.studentService = studentService;
         this.paymentService = paymentService;
+        this.predmetService = predmetService;
+        this.certificateService = certificateService;
     }
 
     @FXML
@@ -442,5 +460,148 @@ public class StudentProfileController {
         } else {
             Platform.runLater(action);
         }
+    }
+
+    @FXML
+    public void handleGenerateEnrollmentCertificate() {
+        if (activeIndex == null || activeStudentId == null) {
+            showMessage(statusLabel, "Nema izabranog studenta. Molimo izaberite studenta sa aktivnim indeksom.");
+            return;
+        }
+
+        Selection selection = selectedStudentStore.getSelection();
+        if (selection == null || selection.getStudent() == null) {
+            showMessage(statusLabel, "Greška: Student nije dostupan.");
+            return;
+        }
+
+        StudentDto student = selection.getStudent();
+        showMessage(statusLabel, "Generisanje uverenja o studiranju...");
+
+        // Fetch enrollment and renewal data
+        studentService.findEnrolledYears(activeIndex)
+                .collectList()
+                .zipWith(studentService.findRepeatedYears(activeIndex).collectList())
+                .subscribe(tuple -> {
+                    List<UpisGodineDto> enrollments = tuple.getT1();
+                    List<ObnovaGodineDto> renewals = tuple.getT2();
+
+                    EnrollmentCertificateData data = EnrollmentCertificateData.builder()
+                            .ime(student.getIme())
+                            .prezime(student.getPrezime())
+                            .srednjeIme(student.getSrednjeIme())
+                            .indeks(activeIndex)
+                            .jmbg(student.getJmbg())
+                            .datumRodjenja(student.getDatumRodjenja())
+                            .mestoRodjenja(student.getMestoRodjenja())
+                            .drzavaRodjenja(student.getDrzavaRodjenja())
+                            .studijskiProgram("N/A") // Could be enriched from backend
+                            .fakultet("Računarski fakultet")
+                            .upisaneGodine(enrollments)
+                            .obnovljeneGodine(renewals)
+                            .trenutniStatus("Aktivan")
+                            .build();
+
+                    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                    String filename = "uverenje_studiranje_" + activeIndex.replace("/", "_") + "_" + timestamp + ".pdf";
+
+                    try {
+                        certificateService.generateEnrollmentCertificate(data, filename);
+                        runOnFx(() -> showMessage(statusLabel, "Uverenje o studiranju uspešno generisano: " + filename));
+                    } catch (JRException e) {
+                        runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
+                        e.printStackTrace();
+                    }
+                }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju podataka: " + error.getMessage())));
+    }
+
+    @FXML
+    public void handleGeneratePassedExamsCertificate() {
+        if (activeIndex == null || activeStudentId == null) {
+            showMessage(statusLabel, "Nema izabranog studenta. Molimo izaberite studenta sa aktivnim indeksom.");
+            return;
+        }
+
+        Selection selection = selectedStudentStore.getSelection();
+        if (selection == null || selection.getStudent() == null) {
+            showMessage(statusLabel, "Greška: Student nije dostupan.");
+            return;
+        }
+
+        StudentDto student = selection.getStudent();
+        showMessage(statusLabel, "Generisanje uverenja o položenim ispitima...");
+
+        // Fetch passed exams
+        studentService.findPassedExams(activeIndex)
+                .collectList()
+                .subscribe(passedExams -> {
+                    if (passedExams.isEmpty()) {
+                        runOnFx(() -> showMessage(statusLabel, "Student nema evidentirane položene ispite."));
+                        return;
+                    }
+
+                    // Collect unique predmet IDs
+                    List<Long> predmetIds = passedExams.stream()
+                            .map(PolozenPredmetDto::getPredmetId)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    // Fetch predmet details
+                    predmetService.findPredmetsByIds(predmetIds)
+                            .collectList()
+                            .subscribe(predmeti -> {
+                                Map<Long, PredmetDto> predmetMap = predmeti.stream()
+                                        .collect(Collectors.toMap(PredmetDto::getId, p -> p));
+
+                                // Group exams by study year based on semester
+                                Map<Integer, List<ExamDetails>> examsByYear = new TreeMap<>();
+
+                                for (PolozenPredmetDto passed : passedExams) {
+                                    PredmetDto predmet = predmetMap.get(passed.getPredmetId());
+                                    if (predmet == null) continue;
+
+                                    Integer semestar = predmet.getSemestar();
+                                    Integer year = semestar != null ? (semestar + 1) / 2 : 0; // 1-2 -> 1, 3-4 -> 2, etc.
+
+                                    ExamDetails examDetail = ExamDetails.builder()
+                                            .sifraPredmeta(predmet.getSifra())
+                                            .nazivPredmeta(predmet.getNaziv())
+                                            .ocena(passed.getOcena())
+                                            .espbBodovi(predmet.getEspbBodovi())
+                                            .datumPolaganja("") // Could be enriched if available
+                                            .build();
+
+                                    examsByYear.computeIfAbsent(year, k -> new ArrayList<>()).add(examDetail);
+                                }
+
+                                // Convert to ExamByYearGroup list
+                                List<ExamByYearGroup> examGroups = examsByYear.entrySet().stream()
+                                        .map(entry -> ExamByYearGroup.builder()
+                                                .godinaStudija(entry.getKey())
+                                                .ispiti(entry.getValue())
+                                                .build())
+                                        .collect(Collectors.toList());
+
+                                PassedExamCertificateData data = PassedExamCertificateData.builder()
+                                        .ime(student.getIme())
+                                        .prezime(student.getPrezime())
+                                        .srednjeIme(student.getSrednjeIme())
+                                        .indeks(activeIndex)
+                                        .examsByYear(examGroups)
+                                        .build();
+
+                                String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                                String filename = "uverenje_polozeni_" + activeIndex.replace("/", "_") + "_" + timestamp + ".pdf";
+
+                                try {
+                                    certificateService.generatePassedExamsCertificate(data, filename);
+                                    runOnFx(() -> showMessage(statusLabel, "Uverenje o položenim ispitima uspešno generisano: " + filename));
+                                } catch (JRException e) {
+                                    runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
+                                    e.printStackTrace();
+                                }
+                            }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju predmeta: " + error.getMessage())));
+                }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju položenih ispita: " + error.getMessage())));
     }
 }
