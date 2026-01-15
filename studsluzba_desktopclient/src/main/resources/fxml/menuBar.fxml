@@ -44,7 +44,7 @@
                     <MenuItem text="Ispiti - unos" />
                     <MenuItem text="Ispiti - prijave" />
                     <MenuItem text="Ispiti - rezultati" />
-                </items>                          
+                </items>
             </Menu>
             <Menu text="Administracija">
                 <items>
