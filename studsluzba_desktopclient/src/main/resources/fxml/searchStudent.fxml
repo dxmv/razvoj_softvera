@@ -54,6 +54,11 @@
                 </padding>
                 <TableView fx:id="tabelaStudenti" minHeight="300" prefWidth="700">
                     <columns>
+                        <TableColumn fx:id="idColumn" prefWidth="80" text="ID">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="id" />
+                            </cellValueFactory>
+                        </TableColumn>
                         <TableColumn fx:id="imeColumn" maxWidth="200.0" prefWidth="150" text="Ime">
                             <cellValueFactory>
                                 <PropertyValueFactory property="ime" />
@@ -62,11 +67,6 @@
                         <TableColumn fx:id="prezimeColumn" prefWidth="150" text="Prezime">
                             <cellValueFactory>
                                 <PropertyValueFactory property="prezime" />
-                            </cellValueFactory>
-                        </TableColumn>
-                        <TableColumn fx:id="godinaUpisaColumn" prefWidth="100" text="Godina upisa">
-                            <cellValueFactory>
-                                <PropertyValueFactory property="godinaUpisa" />
                             </cellValueFactory>
                         </TableColumn>
                     </columns>
