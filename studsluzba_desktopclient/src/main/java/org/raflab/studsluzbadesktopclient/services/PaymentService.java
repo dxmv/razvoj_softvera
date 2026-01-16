@@ -9,9 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -44,19 +41,10 @@ public class PaymentService {
                 .bodyToMono(RemainingTuitionDto.class);
     }
 
-    public Mono<UplataDto> createPaymentWithCurrentRate(Long studentId, BigDecimal iznosRSD, LocalDate datum) {
+    public Mono<UplataDto> createPayment(Long studentId, CreateUplataRequest request) {
         if (studentId == null) {
-            return Mono.error(new IllegalArgumentException("Student ID is required"));
+            return Mono.error(new IllegalArgumentException("studentId je obavezan"));
         }
-        if (iznosRSD == null || iznosRSD.compareTo(BigDecimal.ZERO) <= 0) {
-            return Mono.error(new IllegalArgumentException("Iznos mora biti veći od nule"));
-        }
-
-        CreateUplataRequest request = CreateUplataRequest.builder()
-                .iznosUDinarima(iznosRSD)
-                .datumUplate(datum) // can be null, server will use today
-                .build();
-
         return webClient
                 .post()
                 .uri(uriBuilder -> uriBuilder

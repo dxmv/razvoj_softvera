@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
-import javafx.stage.Stage;
 import net.sf.jasperreports.engine.JRException;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
@@ -15,11 +14,11 @@ import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
-import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.model.reports.EnrollmentCertificateData;
 import org.raflab.studsluzbadesktopclient.model.reports.ExamByYearGroup;
 import org.raflab.studsluzbadesktopclient.model.reports.ExamDetails;
 import org.raflab.studsluzbadesktopclient.model.reports.PassedExamCertificateData;
+import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.services.CertificateService;
 import org.raflab.studsluzbadesktopclient.services.PaymentService;
 import org.raflab.studsluzbadesktopclient.services.PredmetService;
@@ -611,38 +610,72 @@ public class StudentProfileController {
     }
 
     @FXML
-    public void handleOpenPaymentModal() {
-        if (activeStudentId == null) {
-            showMessage(statusLabel, "Nema izabranog studenta. Molimo izaberite studenta.");
+    public void handleOpenEnrollmentModal() {
+        if (!hasIndex(activeIndex)) {
+            showMessage(statusLabel, "Nema aktivnog indeksa. Otvorite profil unosom broja indeksa.");
             return;
         }
 
-        try {
-            Stage modalStage = mainView.openModal("addUplata");
-            if (modalStage != null) {
-                // Get the controller and set student ID
-                Object controller = modalStage.getUserData();
-                if (controller instanceof AddUplataController) {
-                    AddUplataController uplataController = (AddUplataController) controller;
-                    uplataController.setStudentId(activeStudentId);
-                    uplataController.setProfileController(this);
+        mainView.<EnrollYearModalController>openModalWithConfigurator(
+                "enrollYearModal",
+                "Upis godine",
+                420, 380,
+                controller -> {
+                    controller.setIndex(activeIndex);
+                    controller.setOnSuccessCallback(result -> {
+                        // Refresh enrollments data
+                        loadEnrollments(activeIndex);
+                        loadFailedExams(activeIndex);
+                    });
                 }
-            }
-        } catch (Exception e) {
-            showMessage(statusLabel, "Greška pri otvaranju forme za uplatu: " + e.getMessage());
-            e.printStackTrace();
-        }
+        );
     }
 
-    public void refreshPaymentsData() {
-        if (activeStudentId == null) {
+    @FXML
+    public void handleOpenRenewalModal() {
+        if (!hasIndex(activeIndex)) {
+            showMessage(statusLabel, "Nema aktivnog indeksa. Otvorite profil unosom broja indeksa.");
             return;
         }
-        
-        // Reload payments
-        loadPayments(activeStudentId);
-        
-        // Show success message
-        runOnFx(() -> showMessage(statusLabel, "Uplata uspešno evidentirana. Podaci osveženi."));
+
+        mainView.<RepeatYearModalController>openModalWithConfigurator(
+                "repeatYearModal",
+                "Obnova godine",
+                520, 550,
+                controller -> {
+                    controller.setIndex(activeIndex);
+                    controller.setOnSuccessCallback(result -> {
+                        // Refresh data after renewal
+                        loadRepeatedYears(activeIndex);
+                        loadFailedExams(activeIndex);
+                    });
+                }
+        );
+    }
+
+    @FXML
+    public void handleOpenPaymentModal() {
+        if (activeStudentId == null) {
+            showMessage(statusLabel, "Nema izabranog studenta za unos uplate.");
+            return;
+        }
+
+        Selection selection = selectedStudentStore.getSelection();
+        String studentName = selection != null && selection.getStudent() != null
+                ? selection.getStudent().getIme() + " " + selection.getStudent().getPrezime()
+                : "ID: " + activeStudentId;
+
+        mainView.<PaymentModalController>openModalWithConfigurator(
+                "paymentModal",
+                "Unos uplate",
+                420, 350,
+                controller -> {
+                    controller.setStudentInfo(activeStudentId, studentName);
+                    controller.setOnSuccessCallback(result -> {
+                        // Refresh payments data
+                        loadPayments(activeStudentId);
+                    });
+                }
+        );
     }
 }

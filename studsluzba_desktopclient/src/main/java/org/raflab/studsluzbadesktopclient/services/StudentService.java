@@ -5,10 +5,12 @@ import java.util.function.Consumer;
 
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
+import org.raflab.studsluzba.model.dto.ObnovaGodineRequest;
 import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
 import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
+import org.raflab.studsluzba.model.dto.UpisGodineEnrollmentRequest;
 import org.raflab.studsluzbadesktopclient.utils.PageResponse;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -207,6 +209,34 @@ public class StudentService {
 						.build(indeks))
 				.retrieve()
 				.bodyToFlux(ObnovaGodineDto.class);
+	}
+
+	public Mono<UpisGodineDto> enrollYear(String indeks, UpisGodineEnrollmentRequest request) {
+		if (indeks == null || indeks.isBlank()) {
+			return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
+		}
+		return webClient
+				.post()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/enroll")
+						.build(indeks))
+				.bodyValue(request)
+				.retrieve()
+				.bodyToMono(UpisGodineDto.class);
+	}
+
+	public Mono<ObnovaGodineDto> repeatYear(String indeks, ObnovaGodineRequest request) {
+		if (indeks == null || indeks.isBlank()) {
+			return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
+		}
+		return webClient
+				.post()
+				.uri(uriBuilder -> uriBuilder
+						.path(API_STUDENT_PATH + "/by-index/{index}/repeat")
+						.build(indeks))
+				.bodyValue(request)
+				.retrieve()
+				.bodyToMono(ObnovaGodineDto.class);
 	}
 
 	private Flux<StudentDto> fetchStudentPage(String path, Consumer<UriComponentsBuilder> uriCustomizer) {

@@ -139,18 +139,33 @@ public class MainView {
         return true;
     }
 
-    public Stage openModal(String fxml) {
-        return openModal(fxml, null, 400, 300);
+    public void openModal(String fxml) {
+        openModal(fxml, null, 400, 300);
     }
 
-    public Stage openModal(String fxml, String title) {
-        return openModal(fxml, title, 400, 300);
+    public void openModal(String fxml, String title) {
+        openModal(fxml, title, 400, 300);
     }
 
-    public Stage openModal(String fxml, String title, int width, int height) {
+    public void openModal(String fxml, String title, int width, int height) {
+        openModalAndGetController(fxml, title, width, height);
+    }
+
+    /**
+     * Opens a modal dialog and returns the controller for further configuration.
+     * @param fxml The FXML file name (without .fxml extension)
+     * @param title Optional window title
+     * @param width Window width
+     * @param height Window height
+     * @param <T> Controller type
+     * @return The controller instance, or null if loading failed
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T openModalAndGetController(String fxml, String title, int width, int height) {
         FXMLLoader loader = appFXMLLoader.getLoader(MainView.class.getResource("/fxml/" + fxml + ".fxml"));
         try {
             Parent parent = loader.load();
+            T controller = loader.getController();
             Scene modalScene = new Scene(parent, width, height);
             Stage stage = new Stage();
             if (title != null) {
@@ -158,16 +173,42 @@ public class MainView {
             }
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(modalScene);
-            
-            // Store controller in stage user data
-            Object controller = loader.getController();
-            stage.setUserData(controller);
-            
             stage.showAndWait();
-            return stage;
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * Opens a modal dialog, configures the controller before showing, and waits for it to close.
+     * @param fxml The FXML file name (without .fxml extension)
+     * @param title Optional window title
+     * @param width Window width
+     * @param height Window height
+     * @param configurator Function to configure the controller before the dialog is shown
+     * @param <T> Controller type
+     */
+    @SuppressWarnings("unchecked")
+    public <T> void openModalWithConfigurator(String fxml, String title, int width, int height, java.util.function.Consumer<T> configurator) {
+        FXMLLoader loader = appFXMLLoader.getLoader(MainView.class.getResource("/fxml/" + fxml + ".fxml"));
+        try {
+            Parent parent = loader.load();
+            T controller = loader.getController();
+            if (configurator != null && controller != null) {
+                configurator.accept(controller);
+            }
+            Scene modalScene = new Scene(parent, width, height);
+            Stage stage = new Stage();
+            if (title != null) {
+                stage.setTitle(title);
+            }
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(modalScene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

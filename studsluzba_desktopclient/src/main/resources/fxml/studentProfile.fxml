@@ -34,7 +34,6 @@
                 </padding>
                 <Button text="Generiši uverenje o studiranju" onAction="#handleGenerateEnrollmentCertificate" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
                 <Button text="Generiši uverenje o položenim ispitima" onAction="#handleGeneratePassedExamsCertificate" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
-                <Button text="Nova uplata" onAction="#handleOpenPaymentModal" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-size: 12px;" />
             </HBox>
             <TabPane prefHeight="600.0" tabClosingPolicy="UNAVAILABLE">
                 <tabs>
@@ -156,8 +155,14 @@
                     </Tab>
                     <Tab text="Uplate">
                         <VBox spacing="12.0" alignment="TOP_CENTER">
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <padding>
+                                    <Insets top="5.0" bottom="5.0" />
+                                </padding>
+                                <Button text="Dodaj uplatu" onAction="#handleOpenPaymentModal" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 6 12;" />
+                            </HBox>
                             <Label fx:id="paymentsMessageLabel" />
-                            <TableView fx:id="paymentsTable" prefHeight="350.0">
+                            <TableView fx:id="paymentsTable" prefHeight="320.0">
                                 <columns>
                                     <TableColumn text="Datum" prefWidth="150.0">
                                         <cellValueFactory>
@@ -186,6 +191,13 @@
                     </Tab>
                     <Tab text="Upisane / obnovljene godine">
                         <VBox spacing="12.0" alignment="TOP_CENTER">
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <padding>
+                                    <Insets top="5.0" bottom="5.0" />
+                                </padding>
+                                <Button text="Upiši godinu" onAction="#handleOpenEnrollmentModal" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 6 12;" />
+                                <Button text="Obnovi godinu" onAction="#handleOpenRenewalModal" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-padding: 6 12;" />
+                            </HBox>
                             <Label text="Upisane godine" style="-fx-font-weight: bold;" />
                             <Label fx:id="enrollmentsMessageLabel" />
                             <TableView fx:id="enrollmentsTable" prefHeight="220.0">
