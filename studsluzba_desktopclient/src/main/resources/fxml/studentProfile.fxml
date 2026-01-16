@@ -242,6 +242,26 @@
                             </TableView>
                         </VBox>
                     </Tab>
+                    <Tab text="Statistika">
+                        <VBox spacing="30.0" alignment="CENTER">
+                            <padding>
+                                <Insets top="40.0" bottom="40.0" left="40.0" right="40.0" />
+                            </padding>
+                            <Label fx:id="statsMessageLabel" />
+                            <VBox spacing="15.0" alignment="CENTER" style="-fx-background-color: #f5f5f5; -fx-padding: 30; -fx-background-radius: 10;">
+                                <Label text="Ukupan broj ostvarenih ESPB" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                                <Label fx:id="totalEspbLabel" text="--" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #2196F3;" />
+                            </VBox>
+                            <VBox spacing="15.0" alignment="CENTER" style="-fx-background-color: #f5f5f5; -fx-padding: 30; -fx-background-radius: 10;">
+                                <Label text="Prosečna ocena" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                                <Label fx:id="prosecnaOcenaLabel" text="--" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" />
+                            </VBox>
+                            <VBox spacing="15.0" alignment="CENTER" style="-fx-background-color: #f5f5f5; -fx-padding: 30; -fx-background-radius: 10;">
+                                <Label text="Broj položenih ispita" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                                <Label fx:id="passedCountLabel" text="--" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #FF9800;" />
+                            </VBox>
+                        </VBox>
+                    </Tab>
                 </tabs>
             </TabPane>
         </VBox>

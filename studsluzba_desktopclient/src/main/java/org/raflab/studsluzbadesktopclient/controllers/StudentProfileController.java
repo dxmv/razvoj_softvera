@@ -109,6 +109,16 @@ public class StudentProfileController {
     @FXML
     private Label repeatedYearsMessageLabel;
 
+    // Statistics tab
+    @FXML
+    private Label statsMessageLabel;
+    @FXML
+    private Label totalEspbLabel;
+    @FXML
+    private Label prosecnaOcenaLabel;
+    @FXML
+    private Label passedCountLabel;
+
     public StudentProfileController(SelectedStudentStore selectedStudentStore,
                                     StudentService studentService,
                                     PaymentService paymentService,
@@ -330,7 +340,9 @@ public class StudentProfileController {
         showMessage(paymentsMessageLabel, "");
         showMessage(enrollmentsMessageLabel, "");
         showMessage(repeatedYearsMessageLabel, "");
+        showMessage(statsMessageLabel, "");
         updateRemainingTuitionLabels(null);
+        clearStatisticsLabels();
     }
 
     private void loadIndexBoundData(String index) {
@@ -342,6 +354,117 @@ public class StudentProfileController {
         loadFailedExams(index);
         loadEnrollments(index);
         loadRepeatedYears(index);
+        loadStatistics(index);
+    }
+
+    private void loadStatistics(String index) {
+        showMessage(statsMessageLabel, "Učitavanje statistike...");
+        clearStatisticsLabels();
+
+        studentService.findPassedExams(index)
+                .collectList()
+                .subscribe(passedExamsList -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+
+                    if (passedExamsList.isEmpty()) {
+                        runOnFx(() -> {
+                            showMessage(statsMessageLabel, "Nema položenih ispita za izračunavanje statistike.");
+                            updateStatisticsLabels(0, 0.0, 0);
+                        });
+                        return;
+                    }
+
+                    // Calculate GPA from grades
+                    double gpa = passedExamsList.stream()
+                            .map(PolozenPredmetDto::getOcena)
+                            .filter(Objects::nonNull)
+                            .mapToInt(Integer::intValue)
+                            .average()
+                            .orElse(0.0);
+
+                    int passedCount = passedExamsList.size();
+
+                    // Collect predmet IDs to fetch ESPB
+                    List<Long> predmetIds = passedExamsList.stream()
+                            .map(PolozenPredmetDto::getPredmetId)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    if (predmetIds.isEmpty()) {
+                        runOnFx(() -> {
+                            showMessage(statsMessageLabel, "");
+                            updateStatisticsLabels(0, gpa, passedCount);
+                        });
+                        return;
+                    }
+
+                    // Fetch predmet details to get ESPB
+                    predmetService.findPredmetsByIds(predmetIds)
+                            .collectList()
+                            .subscribe(predmeti -> {
+                                if (!index.equals(activeIndex)) {
+                                    return;
+                                }
+
+                                Map<Long, Integer> predmetEspbMap = predmeti.stream()
+                                        .filter(p -> p.getEspbBodovi() != null)
+                                        .collect(Collectors.toMap(PredmetDto::getId, PredmetDto::getEspbBodovi));
+
+                                // Sum ESPB for all passed exams
+                                int totalEspb = passedExamsList.stream()
+                                        .map(PolozenPredmetDto::getPredmetId)
+                                        .filter(Objects::nonNull)
+                                        .map(predmetEspbMap::get)
+                                        .filter(Objects::nonNull)
+                                        .mapToInt(Integer::intValue)
+                                        .sum();
+
+                                runOnFx(() -> {
+                                    showMessage(statsMessageLabel, "");
+                                    updateStatisticsLabels(totalEspb, gpa, passedCount);
+                                });
+                            }, error -> runOnFx(() -> {
+                                if (!index.equals(activeIndex)) {
+                                    return;
+                                }
+                                showMessage(statsMessageLabel, "Greška pri učitavanju ESPB podataka: " + error.getMessage());
+                                // Still show GPA and count even if ESPB fetch failed
+                                updateStatisticsLabels(0, gpa, passedCount);
+                            }));
+                }, error -> runOnFx(() -> {
+                    if (!index.equals(activeIndex)) {
+                        return;
+                    }
+                    showMessage(statsMessageLabel, "Greška pri učitavanju statistike: " + error.getMessage());
+                    clearStatisticsLabels();
+                }));
+    }
+
+    private void updateStatisticsLabels(int totalEspb, double gpa, int passedCount) {
+        if (totalEspbLabel != null) {
+            totalEspbLabel.setText(String.valueOf(totalEspb));
+        }
+        if (prosecnaOcenaLabel != null) {
+            prosecnaOcenaLabel.setText(gpa > 0 ? String.format("%.2f", gpa) : "--");
+        }
+        if (passedCountLabel != null) {
+            passedCountLabel.setText(String.valueOf(passedCount));
+        }
+    }
+
+    private void clearStatisticsLabels() {
+        if (totalEspbLabel != null) {
+            totalEspbLabel.setText("--");
+        }
+        if (prosecnaOcenaLabel != null) {
+            prosecnaOcenaLabel.setText("--");
+        }
+        if (passedCountLabel != null) {
+            passedCountLabel.setText("--");
+        }
     }
 
     private void requestIndexForStudent(StudentDto student) {
@@ -385,10 +508,12 @@ public class StudentProfileController {
         showMessage(failedExamsMessageLabel, message);
         showMessage(enrollmentsMessageLabel, message);
         showMessage(repeatedYearsMessageLabel, message);
+        showMessage(statsMessageLabel, message);
         passedExams.clear();
         failedExams.clear();
         enrollments.clear();
         repeatedYears.clear();
+        clearStatisticsLabels();
     }
 
     private void showMissingIndexMessages(String customMessage) {
@@ -398,10 +523,12 @@ public class StudentProfileController {
         showMessage(failedExamsMessageLabel, message);
         showMessage(enrollmentsMessageLabel, message);
         showMessage(repeatedYearsMessageLabel, message);
+        showMessage(statsMessageLabel, message);
         passedExams.clear();
         failedExams.clear();
         enrollments.clear();
         repeatedYears.clear();
+        clearStatisticsLabels();
     }
 
     private boolean hasIndex(String index) {
