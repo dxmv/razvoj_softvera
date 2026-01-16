@@ -117,7 +117,10 @@ public class StudentService {
     }
 
     public List<StudentDto> findEnrolledByHighSchool(Long srednjaSkolaId) {
-        if (srednjaSkolaId != null && !srednjasSkolaRepository.existsById(srednjaSkolaId)) {
+        if (srednjaSkolaId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Srednja skola ID is required");
+        }
+        if (!srednjasSkolaRepository.existsById(srednjaSkolaId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Srednja skola not found: " + srednjaSkolaId);
         }
         return repository.findEnrolledByHighSchool(srednjaSkolaId).stream()

@@ -19,9 +19,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             nativeQuery = true)
     Page<Student> searchByImeAndPrezime(@Param("ime") String ime, @Param("prezime") String prezime, Pageable pageable);
 
-    @Query("SELECT DISTINCT s FROM Student s " +
-            "JOIN s.indeksi i " +
-            "JOIN UpisGodine ug ON ug.studentskiIndeks = i " +
-            "WHERE (:srednjaSkolaId IS NULL OR s.zavrsenaSkola.id = :srednjaSkolaId)")
+    @Query("SELECT s FROM Student s WHERE s.zavrsenaSkola.id = :srednjaSkolaId")
     List<Student> findEnrolledByHighSchool(@Param("srednjaSkolaId") Long srednjaSkolaId);
 }
