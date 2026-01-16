@@ -13,12 +13,14 @@ module stud_sluzba_desktop_client {
     requires jasperreports;
     requires studsluzba_dto;
     exports org.raflab.studsluzbadesktopclient;
+    exports org.raflab.studsluzbadesktopclient.client;
     exports org.raflab.studsluzbadesktopclient.controllers;
     exports org.raflab.studsluzbadesktopclient.services;
     exports org.raflab.studsluzbadesktopclient.navigation;
     exports org.raflab.studsluzbadesktopclient.state;
     exports org.raflab.studsluzbadesktopclient.utils;
-    opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml;
+    opens org.raflab.studsluzbadesktopclient.client to spring.core, spring.beans, spring.context;
+    opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml, spring.beans, spring.context;
     opens org.raflab.studsluzbadesktopclient.controllers to spring.core, javafx.fxml;
     opens org.raflab.studsluzbadesktopclient.state to spring.core, spring.beans, spring.context;
     opens org.raflab.studsluzbadesktopclient.utils to spring.core, spring.beans, spring.context;

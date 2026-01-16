@@ -1,262 +1,223 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import java.util.List;
-import java.util.function.Consumer;
 
-import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
-import org.raflab.studsluzba.model.dto.ObnovaGodineRequest;
-import org.raflab.studsluzba.model.dto.PolozenPredmetDto;
-import org.raflab.studsluzba.model.dto.PredmetDto;
-import org.raflab.studsluzba.model.dto.StudentDto;
-import org.raflab.studsluzba.model.dto.UpisGodineDto;
-import org.raflab.studsluzba.model.dto.UpisGodineEnrollmentRequest;
-import org.raflab.studsluzbadesktopclient.utils.PageResponse;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzba.model.dto.*;
+import org.raflab.studsluzbadesktopclient.client.StudentApiClient;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RestController
-@AllArgsConstructor
+/**
+ * Service layer for student-related business logic.
+ * Delegates HTTP operations to StudentApiClient.
+ * Contains validation, business rules, and orchestration.
+ */
+@Service
+@RequiredArgsConstructor
 public class StudentService {
-	
-	private RestTemplate restTemplate;
-	private WebClient webClient;
-	private String baseUrl;
-	
-	private final String STUDENT_URL_PATH = "/student";
-	private final String API_STUDENT_PATH = "/api/studenti";
-    private static final int DEFAULT_PAGE_SIZE = 1000;
 
-    private String createURL(String pathEnd) {
-		return baseUrl + STUDENT_URL_PATH + "/" + pathEnd;
-	}
+    private final StudentApiClient studentApiClient;
 
-	public List<StudentDto> searchStudent(String ime) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createURL("pronadji"));
-		builder.queryParam("ime", ime);
-		ResponseEntity<StudentDto[]> response = restTemplate.getForEntity(builder.toUriString(), StudentDto[].class, HttpMethod.GET);
-		if(response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
-			return List.of(response.getBody());
-		else return null;
-	}
+    // ==================== ASYNC METHODS (non-blocking for UI) ====================
 
-	public List<StudentDto> searchStudents(String ime) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path("student/pronadji")
-						.queryParam("ime", ime)
-						.build())
-				.retrieve()
-				.bodyToFlux(StudentDto.class)
-				.collectList().block();
-	}
+    /**
+     * Search students by name asynchronously.
+     * Use for UI search operations that shouldn't block.
+     */
+    public Flux<StudentDto> searchStudentsAsync(String ime, String prezime) {
+        return studentApiClient.searchStudentsAsync(ime, prezime);
+    }
 
-	public Flux<StudentDto> searchStudentsAsync(String ime, String prezime) {
-		return fetchStudentPage(API_STUDENT_PATH + "/search", builder -> {
-			if (ime != null && !ime.trim().isEmpty()) {
-				builder.queryParam("ime", ime.trim());
-			}
-			if (prezime != null && !prezime.trim().isEmpty()) {
-				builder.queryParam("prezime", prezime.trim());
-			}
-		});
-	}
-
-
-	public Integer saveStudent(StudentDto student) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createURL("add"));
-		ResponseEntity<Integer> response = restTemplate.postForEntity(builder.toUriString(), new HttpEntity<>(student), Integer.class);
-		if(response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
-			return response.getBody();
-		else return null;
-	}
-
+    /**
+     * Fetch all students asynchronously.
+     */
     public Flux<StudentDto> fetchAllStudentsAsync() {
-		return fetchStudentPage(API_STUDENT_PATH, null);
+        return studentApiClient.fetchAllStudentsAsync();
     }
 
+    /**
+     * Find student by index asynchronously.
+     */
+    public Mono<StudentDto> findStudentByIndexAsync(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return Mono.empty();
+        }
+        return studentApiClient.findStudentByIndexAsync(indeks);
+    }
+
+    /**
+     * Find active index value for student asynchronously.
+     */
+    public Mono<String> findActiveIndexValue(Long studentId) {
+        if (studentId == null) {
+            return Mono.error(new IllegalArgumentException("studentId is required"));
+        }
+        return studentApiClient.findActiveIndexValueAsync(studentId);
+    }
+
+    /**
+     * Find passed exams for student asynchronously.
+     */
+    public Flux<PolozenPredmetDto> findPassedExams(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return Flux.empty();
+        }
+        return studentApiClient.findPassedExamsAsync(indeks);
+    }
+
+    /**
+     * Find failed exams for student asynchronously.
+     */
+    public Flux<PredmetDto> findFailedExams(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return Flux.empty();
+        }
+        return studentApiClient.findFailedExamsAsync(indeks);
+    }
+
+    /**
+     * Find enrolled years for student asynchronously.
+     */
+    public Flux<UpisGodineDto> findEnrolledYears(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return Flux.empty();
+        }
+        return studentApiClient.findEnrolledYearsAsync(indeks);
+    }
+
+    /**
+     * Find repeated years for student asynchronously.
+     */
+    public Flux<ObnovaGodineDto> findRepeatedYears(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return Flux.empty();
+        }
+        return studentApiClient.findRepeatedYearsAsync(indeks);
+    }
+
+    /**
+     * Enroll student in year asynchronously.
+     * Validates input before making API call.
+     */
+    public Mono<UpisGodineDto> enrollYear(String indeks, UpisGodineEnrollmentRequest request) {
+        if (indeks == null || indeks.isBlank()) {
+            return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
+        }
+        if (request == null) {
+            return Mono.error(new IllegalArgumentException("Request je obavezan"));
+        }
+        if (request.getGodinaStudija() == null) {
+            return Mono.error(new IllegalArgumentException("Godina studija je obavezna"));
+        }
+        return studentApiClient.enrollYearAsync(indeks, request);
+    }
+
+    /**
+     * Repeat year for student asynchronously.
+     * Validates input before making API call.
+     */
+    public Mono<ObnovaGodineDto> repeatYear(String indeks, ObnovaGodineRequest request) {
+        if (indeks == null || indeks.isBlank()) {
+            return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
+        }
+        if (request == null) {
+            return Mono.error(new IllegalArgumentException("Request je obavezan"));
+        }
+        if (request.getGodinaStudija() == null) {
+            return Mono.error(new IllegalArgumentException("Godina studija je obavezna"));
+        }
+        if (request.getPredmetIds() == null || request.getPredmetIds().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Morate izabrati bar jedan predmet"));
+        }
+        return studentApiClient.repeatYearAsync(indeks, request);
+    }
+
+    /**
+     * Find students by high school asynchronously.
+     */
+    public Flux<StudentDto> findStudentsByHighSchoolAsync(Long srednjaSkolaId) {
+        if (srednjaSkolaId == null) {
+            return Flux.empty();
+        }
+        return studentApiClient.findStudentsByHighSchoolAsync(srednjaSkolaId);
+    }
+
+    // ==================== SYNC METHODS (blocking - for reports) ====================
+
+    /**
+     * Search student synchronously.
+     * Use for reports or when blocking is acceptable.
+     */
+    public List<StudentDto> searchStudent(String ime) {
+        return studentApiClient.searchStudentSync(ime);
+    }
+
+    /**
+     * Save student synchronously.
+     */
+    public Integer saveStudent(StudentDto student) {
+        if (student == null) {
+            return null;
+        }
+        return studentApiClient.saveStudentSync(student);
+    }
+
+    /**
+     * Get all students synchronously.
+     * Use for reports.
+     */
     public List<StudentDto> sviStudenti() {
-		return fetchAllStudentsAsync().collectList().blockOptional().orElse(List.of());
+        return studentApiClient.getAllStudentsSync();
     }
 
-	public List<StudentDto> searchStudentsPaged(String ime, String prezime) {
-		return fetchStudentPageBlocking(API_STUDENT_PATH + "/search", builder -> {
-			if (ime != null && !ime.trim().isEmpty()) {
-				builder.queryParam("ime", ime.trim());
-			}
-			if (prezime != null && !prezime.trim().isEmpty()) {
-				builder.queryParam("prezime", prezime.trim());
-			}
-		});
+    /**
+     * Search students with pagination synchronously.
+     * Use for reports.
+     */
+    public List<StudentDto> searchStudentsPaged(String ime, String prezime) {
+        return studentApiClient.searchStudentsPagedSync(ime, prezime);
     }
 
+    /**
+     * Find student by index synchronously.
+     */
+    public StudentDto findStudentByIndex(String indeks) {
+        if (indeks == null || indeks.isBlank()) {
+            return null;
+        }
+        return studentApiClient.findStudentByIndexSync(indeks);
+    }
+
+    /**
+     * Find students by high school synchronously.
+     * Use for reports.
+     */
     public List<StudentDto> findStudentsByHighSchool(Long srednjaSkolaId) {
-		if (srednjaSkolaId == null) {
-			return List.of();
-		}
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-high-school/{id}")
-						.build(srednjaSkolaId))
-				.retrieve()
-				.bodyToFlux(StudentDto.class)
-				.collectList()
-				.blockOptional()
-				.orElse(List.of());
+        if (srednjaSkolaId == null) {
+            return List.of();
+        }
+        return studentApiClient.findStudentsByHighSchoolSync(srednjaSkolaId);
     }
 
-	public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path("student/godina-upisa")
-						.queryParam("godinaUpisa", godinaUpisa)
-						.build())
-				.retrieve()
-				.bodyToFlux(StudentDto.class)
-				.collectList().block();
-	}
+    /**
+     * Search students by enrollment year synchronously.
+     */
+    public List<StudentDto> searchStudentsByGodinaUpisa(Integer godinaUpisa) {
+        if (godinaUpisa == null) {
+            return List.of();
+        }
+        return studentApiClient.searchStudentsByGodinaUpisaSync(godinaUpisa);
+    }
 
-	public List<StudentDto> searchStudentsByStudProg(String studProg) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path("student/studprogram")
-						.queryParam("studProg", studProg)
-						.build())
-				.retrieve()
-				.bodyToFlux(StudentDto.class)
-				.collectList().block();
-	}
-
-	public Mono<StudentDto> findStudentByIndexAsync(String indeks) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path("/api/studenti/by-index/{index}")
-						.build(indeks))
-				.retrieve()
-				.bodyToMono(StudentDto.class);
-	}
-
-	public StudentDto findStudentByIndex(String indeks) {
-		return findStudentByIndexAsync(indeks).block();
-	}
-
-	public Mono<String> findActiveIndexValue(Long studentId) {
-		if (studentId == null) {
-			return Mono.error(new IllegalArgumentException("studentId is required"));
-		}
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/{id}/active-index")
-						.build(studentId))
-				.retrieve()
-				.bodyToMono(String.class);
-	}
-
-	public Flux<PolozenPredmetDto> findPassedExams(String indeks) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/passed")
-						.queryParam("size", 1000)
-						.build(indeks))
-				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<PageResponse<PolozenPredmetDto>>() {})
-				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
-	}
-
-	public Flux<PredmetDto> findFailedExams(String indeks) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/failed")
-						.queryParam("size", 1000)
-						.build(indeks))
-				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<PageResponse<PredmetDto>>() {})
-				.flatMapMany(page -> Flux.fromIterable(page.getContent()));
-	}
-
-	public Flux<UpisGodineDto> findEnrolledYears(String indeks) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/enrolled")
-						.build(indeks))
-				.retrieve()
-				.bodyToFlux(UpisGodineDto.class);
-	}
-
-	public Flux<ObnovaGodineDto> findRepeatedYears(String indeks) {
-		return webClient
-				.get()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/repeated")
-						.build(indeks))
-				.retrieve()
-				.bodyToFlux(ObnovaGodineDto.class);
-	}
-
-	public Mono<UpisGodineDto> enrollYear(String indeks, UpisGodineEnrollmentRequest request) {
-		if (indeks == null || indeks.isBlank()) {
-			return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
-		}
-		return webClient
-				.post()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/enroll")
-						.build(indeks))
-				.bodyValue(request)
-				.retrieve()
-				.bodyToMono(UpisGodineDto.class);
-	}
-
-	public Mono<ObnovaGodineDto> repeatYear(String indeks, ObnovaGodineRequest request) {
-		if (indeks == null || indeks.isBlank()) {
-			return Mono.error(new IllegalArgumentException("Indeks je obavezan"));
-		}
-		return webClient
-				.post()
-				.uri(uriBuilder -> uriBuilder
-						.path(API_STUDENT_PATH + "/by-index/{index}/repeat")
-						.build(indeks))
-				.bodyValue(request)
-				.retrieve()
-				.bodyToMono(ObnovaGodineDto.class);
-	}
-
-	private Flux<StudentDto> fetchStudentPage(String path, Consumer<UriComponentsBuilder> uriCustomizer) {
-		return Flux.fromIterable(fetchStudentPageBlocking(path, uriCustomizer));
-	}
-
-	private List<StudentDto> fetchStudentPageBlocking(String path, Consumer<UriComponentsBuilder> uriCustomizer) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + path)
-				.queryParam("page", 0)
-				.queryParam("size", DEFAULT_PAGE_SIZE);
-		if (uriCustomizer != null) {
-			uriCustomizer.accept(builder);
-		}
-		ResponseEntity<PageResponse<StudentDto>> response = restTemplate.exchange(
-				builder.toUriString(),
-				HttpMethod.GET,
-				HttpEntity.EMPTY,
-				new ParameterizedTypeReference<PageResponse<StudentDto>>() {}
-		);
-		PageResponse<StudentDto> body = response.getBody();
-		return body == null ? List.of() : body.getContent();
-	}
+    /**
+     * Search students by study program synchronously.
+     */
+    public List<StudentDto> searchStudentsByStudProg(String studProg) {
+        if (studProg == null || studProg.isBlank()) {
+            return List.of();
+        }
+        return studentApiClient.searchStudentsByStudProgSync(studProg);
+    }
 }

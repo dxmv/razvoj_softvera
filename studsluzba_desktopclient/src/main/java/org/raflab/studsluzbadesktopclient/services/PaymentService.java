@@ -4,54 +4,56 @@ import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.dto.CreateUplataRequest;
 import org.raflab.studsluzba.model.dto.RemainingTuitionDto;
 import org.raflab.studsluzba.model.dto.UplataDto;
+import org.raflab.studsluzbadesktopclient.client.PaymentApiClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Service layer for payment-related business logic.
+ * Delegates HTTP operations to PaymentApiClient.
+ * Contains validation, business rules, and orchestration.
+ */
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final WebClient webClient;
+    private final PaymentApiClient paymentApiClient;
 
+    /**
+     * Find payments for student asynchronously.
+     */
     public Flux<UplataDto> findPaymentsForStudent(Long studentId) {
         if (studentId == null) {
             return Flux.empty();
         }
-        return webClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/uplate/student/{studentId}")
-                        .build(studentId))
-                .retrieve()
-                .bodyToFlux(UplataDto.class);
+        return paymentApiClient.findPaymentsForStudentAsync(studentId);
     }
 
+    /**
+     * Get remaining tuition balance asynchronously.
+     */
     public Mono<RemainingTuitionDto> getRemainingTuition(Long studentId) {
         if (studentId == null) {
             return Mono.empty();
         }
-        return webClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/uplate/student/{studentId}/balance")
-                        .build(studentId))
-                .retrieve()
-                .bodyToMono(RemainingTuitionDto.class);
+        return paymentApiClient.getRemainingTuitionAsync(studentId);
     }
 
+    /**
+     * Create payment asynchronously.
+     * Validates input before making API call.
+     */
     public Mono<UplataDto> createPayment(Long studentId, CreateUplataRequest request) {
         if (studentId == null) {
             return Mono.error(new IllegalArgumentException("studentId je obavezan"));
         }
-        return webClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/uplate/student/{studentId}")
-                        .build(studentId))
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(UplataDto.class);
+        if (request == null) {
+            return Mono.error(new IllegalArgumentException("Request je obavezan"));
+        }
+        if (request.getIznosUDinarima() == null) {
+            return Mono.error(new IllegalArgumentException("Iznos je obavezan"));
+        }
+        return paymentApiClient.createPaymentAsync(studentId, request);
     }
 }
