@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Component
@@ -636,13 +637,15 @@ public class StudentProfileController {
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                     String filename = "uverenje_studiranje_" + activeIndex.replace("/", "_") + "_" + timestamp + ".pdf";
 
-                    try {
-                        certificateService.generateEnrollmentCertificate(data, filename);
-                        runOnFx(() -> showMessage(statusLabel, "Uverenje o studiranju uspešno generisano: " + filename));
-                    } catch (JRException e) {
-                        runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
-                        e.printStackTrace();
-                    }
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            certificateService.generateEnrollmentCertificate(data, filename);
+                            runOnFx(() -> showMessage(statusLabel, "Uverenje o studiranju uspešno generisano: " + filename));
+                        } catch (JRException e) {
+                            runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
+                            e.printStackTrace();
+                        }
+                    });
                 }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju podataka: " + error.getMessage())));
     }
 
@@ -725,13 +728,15 @@ public class StudentProfileController {
                                 String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                                 String filename = "uverenje_polozeni_" + activeIndex.replace("/", "_") + "_" + timestamp + ".pdf";
 
-                                try {
-                                    certificateService.generatePassedExamsCertificate(data, filename);
-                                    runOnFx(() -> showMessage(statusLabel, "Uverenje o položenim ispitima uspešno generisano: " + filename));
-                                } catch (JRException e) {
-                                    runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
-                                    e.printStackTrace();
-                                }
+                                CompletableFuture.runAsync(() -> {
+                                    try {
+                                        certificateService.generatePassedExamsCertificate(data, filename);
+                                        runOnFx(() -> showMessage(statusLabel, "Uverenje o položenim ispitima uspešno generisano: " + filename));
+                                    } catch (JRException e) {
+                                        runOnFx(() -> showMessage(statusLabel, "Greška pri generisanju uverenja: " + e.getMessage()));
+                                        e.printStackTrace();
+                                    }
+                                });
                             }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju predmeta: " + error.getMessage())));
                 }, error -> runOnFx(() -> showMessage(statusLabel, "Greška pri preuzimanju položenih ispita: " + error.getMessage())));
     }
