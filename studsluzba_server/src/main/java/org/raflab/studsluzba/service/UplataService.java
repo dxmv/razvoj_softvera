@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +83,16 @@ public class UplataService {
 
         Uplata saved = repository.save(uplata);
         return EntityMapper.toDto(saved);
+    }
+
+    public List<UplataDto> findByStudent(Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found: " + studentId);
+        }
+        return repository.findByStudentIdOrderByDatumUplateDesc(studentId)
+                .stream()
+                .map(EntityMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public RemainingTuitionDto getRemainingTuition(Long studentId) {

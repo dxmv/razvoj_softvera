@@ -21,6 +21,7 @@ public class ClientAppConfig {
     
 	@Bean
     public String getBaseUrl() {
-       return "http://localhost:8081";
+       String override = System.getenv("STUDSLUZBA_BASE_URL");
+       return (override == null || override.isBlank()) ? "http://localhost:8081" : override.trim();
     }
 }

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="uverenjeOStudiranju" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d">
+	<parameter name="ime" class="java.lang.String"/>
+	<parameter name="prezime" class="java.lang.String"/>
+	<parameter name="srednjeIme" class="java.lang.String"/>
+	<parameter name="indeks" class="java.lang.String"/>
+	<parameter name="jmbg" class="java.lang.String"/>
+	<parameter name="datumRodjenja" class="java.lang.String"/>
+	<parameter name="mestoRodjenja" class="java.lang.String"/>
+	<parameter name="drzavaRodjenja" class="java.lang.String"/>
+	<parameter name="studijskiProgram" class="java.lang.String"/>
+	<parameter name="fakultet" class="java.lang.String"/>
+	<parameter name="trenutniStatus" class="java.lang.String"/>
+	<parameter name="upisaneGodineDataSource" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="obnovljeneGodineDataSource" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="120" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="40" width="555" height="25" uuid="2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Računarski fakultet]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="75" width="555" height="35" uuid="3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f"/>
+				<textElement textAlignment="Center">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[UVERENJE O STUDIRANJU]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="20" splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="450" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="10" width="515" height="20" uuid="4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Ovim se potvrđuje da je sledeći student upisan na našem fakultetu:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="45" width="100" height="20" uuid="5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ime i prezime:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="45" width="395" height="20" uuid="6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ime} + " " + ($P{srednjeIme} != null ? $P{srednjeIme} + " " : "") + $P{prezime}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="70" width="100" height="20" uuid="7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Broj indeksa:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="70" width="200" height="20" uuid="8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{indeks}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="95" width="100" height="20" uuid="9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[JMBG:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="95" width="200" height="20" uuid="0d1e2f3a-4b5c-6d7e-8f9a-0b1c2d3e4f5a"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{jmbg}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="120" width="100" height="20" uuid="1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Datum rođenja:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="120" width="200" height="20" uuid="2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{datumRodjenja}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="145" width="100" height="20" uuid="3a4b5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Mesto rođenja:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="145" width="395" height="20" uuid="4b5c6d7e-8f9a-0b1c-2d3e-4f5a6b7c8d9e"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{mestoRodjenja} != null ? $P{mestoRodjenja} : "") + ($P{drzavaRodjenja} != null ? ", " + $P{drzavaRodjenja} : "")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="170" width="100" height="20" uuid="5c6d7e8f-9a0b-1c2d-3e4f-5a6b7c8d9e0f"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Studijski program:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="170" width="395" height="20" uuid="6d7e8f9a-0b1c-2d3e-4f5a-6b7c8d9e0f1a"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{studijskiProgram} != null ? $P{studijskiProgram} : "N/A"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="205" width="200" height="20" uuid="7e8f9a0b-1c2d-3e4f-5a6b-7c8d9e0f1a2b"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status studiranja:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="40" y="230" width="495" height="20" uuid="8f9a0b1c-2d3e-4f5a-6b7c-8d9e0f1a2b3c"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{trenutniStatus} != null ? $P{trenutniStatus} : "Aktivan"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="270" width="515" height="30" uuid="9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Ovo uverenje se izdaje na zahtev studenta radi dalje upotrebe.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="350" width="185" height="20" uuid="0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[_____________________]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="370" width="185" height="20" uuid="1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f"/>
+				<textElement textAlignment="Center">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Referent studentske službe]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement x="400" y="30" width="155" height="20" uuid="2d3e4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a"/>
+				<textElement textAlignment="Right">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Strana " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

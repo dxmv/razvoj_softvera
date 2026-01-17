@@ -11,6 +11,7 @@ import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.model.dto.UpisGodineDto;
 import org.raflab.studsluzba.model.dto.UpisGodineEnrollmentRequest;
 import org.raflab.studsluzba.repositories.*;
+import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -116,12 +117,26 @@ public class StudentService {
     }
 
     public List<StudentDto> findEnrolledByHighSchool(Long srednjaSkolaId) {
-        if (srednjaSkolaId != null && !srednjasSkolaRepository.existsById(srednjaSkolaId)) {
+        if (srednjaSkolaId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Srednja skola ID is required");
+        }
+        if (!srednjasSkolaRepository.existsById(srednjaSkolaId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Srednja skola not found: " + srednjaSkolaId);
         }
         return repository.findEnrolledByHighSchool(srednjaSkolaId).stream()
                 .map(EntityMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public String findActiveIndexValue(Long studentId) {
+        if (studentId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student ID is required");
+        }
+        Indeks indeks = indeksService.findActiveForStudent(studentId)
+                .or(() -> indeksService.findLatestForStudent(studentId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Student nema dodeljen indeks: " + studentId));
+        return formatIndeksValue(indeks);
     }
 
     @Transactional
@@ -353,4 +368,19 @@ public class StudentService {
         return List.of(firstSemester, firstSemester + 1);
     }
 
+    public Page<StudentDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable).map(EntityMapper::toDto);
+    }
+
+    private String formatIndeksValue(Indeks indeks) {
+        if (indeks == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Indeks nije pronađen");
+        }
+        StudProgram program = indeks.getStudijskiProgram();
+        if (program == null || program.getOznaka() == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Studijski program nije definisan za indeks " + indeks.getId());
+        }
+        return ParseUtils.formatIndeks(program.getOznaka(), indeks.getBrojIndeksa(), indeks.getGodinaUpisa());
+    }
 }

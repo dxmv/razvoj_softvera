@@ -1,5 +1,6 @@
 package org.raflab.studsluzba.repositories;
 
+import java.util.Optional;
 import org.raflab.studsluzba.model.Indeks;
 import org.raflab.studsluzba.model.StatusIndeksa;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,10 @@ import org.springframework.stereotype.Repository;
 public interface StudentskiIndeksRepository extends JpaRepository<Indeks, Long> {
     @Query("SELECT i FROM Indeks i JOIN i.studijskiProgram sp WHERE sp.oznaka = :smer AND i.brojIndeksa = :broj AND i.godinaUpisa = :godina")
     Indeks findByShort(@Param("smer") String smer, @Param("broj") Integer broj, @Param("godina") Integer godina);
+
+    Optional<Indeks> findFirstByStudentIdAndStatusOrderByDatumAktivacijeDesc(Long studentId, StatusIndeksa status);
+
+    Optional<Indeks> findFirstByStudentIdOrderByDatumAktivacijeDesc(Long studentId);
 
         Indeks findByStudentIdAndStatus(Long studentId, StatusIndeksa status);
 

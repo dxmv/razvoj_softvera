@@ -13,20 +13,28 @@ module stud_sluzba_desktop_client {
     requires jasperreports;
     requires studsluzba_dto;
     exports org.raflab.studsluzbadesktopclient;
+    exports org.raflab.studsluzbadesktopclient.client;
     exports org.raflab.studsluzbadesktopclient.controllers;
     exports org.raflab.studsluzbadesktopclient.services;
     exports org.raflab.studsluzbadesktopclient.navigation;
-    opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml;
+    exports org.raflab.studsluzbadesktopclient.state;
+    exports org.raflab.studsluzbadesktopclient.utils;
+    opens org.raflab.studsluzbadesktopclient.client to spring.core, spring.beans, spring.context;
+    opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml, spring.beans, spring.context;
     opens org.raflab.studsluzbadesktopclient.controllers to spring.core, javafx.fxml;
+    opens org.raflab.studsluzbadesktopclient.state to spring.core, spring.beans, spring.context;
+    opens org.raflab.studsluzbadesktopclient.utils to spring.core, spring.beans, spring.context;
     // Allow Spring to use reflection on this package
     opens org.raflab.studsluzbadesktopclient to javafx.fxml, spring.beans, spring.context, spring.core;
     exports org.raflab.studsluzbadesktopclient.coder;
     opens org.raflab.studsluzbadesktopclient.coder to javafx.fxml, spring.beans, spring.context, spring.core;
 
     //reports
+    requires java.sql;
+    requires java.desktop;
     requires spring.webflux;
 
     requires reactor.core;
-    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.annotation;
     requires org.reactivestreams;
 }

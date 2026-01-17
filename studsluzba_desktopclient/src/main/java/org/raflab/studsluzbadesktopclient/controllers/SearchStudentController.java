@@ -1,32 +1,63 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
+import javafx.application.Platform;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzbadesktopclient.MainView;
+import org.raflab.studsluzbadesktopclient.services.SkoleService;
+import org.raflab.studsluzbadesktopclient.state.SelectedStudentStore;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Component
 public class SearchStudentController {
 
     private final StudentService studentService;
     private final MainView mainView;
+    private final SelectedStudentStore selectedStudentStore;
+    private final SkoleService skoleService;
 
     @FXML
     private TextField imeStudentaTf;
 
     @FXML
+    private TextField prezimeStudentaTf;
+
+    @FXML
+    private TextField brojIndeksaTf;
+
+    @FXML
+    private ComboBox<SrednjaSkolaDto> srednjaSkolaFilterCb;
+
+    @FXML
     private TableView<StudentDto> tabelaStudenti;
 
-    public SearchStudentController(StudentService studentService, MainView mainView) {
+    @FXML
+    private Button openProfileButton;
+
+    public SearchStudentController(StudentService studentService,
+                                   MainView mainView,
+                                   SelectedStudentStore selectedStudentStore,
+                                   SkoleService skoleService) {
         this.studentService = studentService;
         this.mainView = mainView;
+        this.selectedStudentStore = selectedStudentStore;
+        this.skoleService = skoleService;
     }
 
     @FXML
@@ -36,26 +67,56 @@ public class SearchStudentController {
                 openSelectedStudentProfile();
             }
         });
+        if (openProfileButton != null) {
+            openProfileButton.disableProperty().bind(tabelaStudenti.getSelectionModel().selectedItemProperty().isNull());
+        }
+        initializeSrednjaSkolaFilter();
+        if (srednjaSkolaFilterCb != null) {
+            srednjaSkolaFilterCb.setOnAction(event -> handleSearchStudent(null));
+        }
+        Platform.runLater(() -> handleSearchStudent(null));
     }
 
     public void handleSearchStudent(ActionEvent actionEvent) {
-        if(imeStudentaTf.getText().isEmpty())
-            tabelaStudenti.setItems(FXCollections.observableArrayList(studentService.sviStudenti()));
-        else{
-            Flux<StudentDto> flux = studentService.searchStudentsAsync(imeStudentaTf.getText());
-            //Mono predstavlja 0 ili 1 element.
-            flux.collectList() // pretvara Flux u Mono<List<StudentDto>>
-                    .subscribe(
-                            list -> {
-                                // Ovo se izvršava kada stigne rezultat
-                                tabelaStudenti.setItems(FXCollections.observableArrayList(list));
-                                System.out.println("Rezultat je stigao.");
-                            },
-                            error -> {
-                                System.out.println(error.getMessage());
-                            }
-                    );
-            System.out.println("Nakon search operacije.");
+        String imeFilter = imeStudentaTf.getText() == null ? "" : imeStudentaTf.getText().trim();
+        String prezimeFilter = prezimeStudentaTf != null && prezimeStudentaTf.getText() != null
+                ? prezimeStudentaTf.getText().trim()
+                : "";
+        SrednjaSkolaDto selectedSkola = srednjaSkolaFilterCb != null ? srednjaSkolaFilterCb.getValue() : null;
+
+        CompletableFuture
+                .supplyAsync(() -> fetchStudents(imeFilter, prezimeFilter, selectedSkola))
+                .thenAccept(students -> Platform.runLater(() ->
+                        tabelaStudenti.setItems(FXCollections.observableArrayList(students))))
+                .exceptionally(ex -> {
+                    String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                    Platform.runLater(() -> showInfo("Greška pri učitavanju studenata: " + message));
+                    return null;
+                });
+    }
+
+    public void handleClearHighSchoolFilter(ActionEvent actionEvent) {
+        if (srednjaSkolaFilterCb != null) {
+            srednjaSkolaFilterCb.getSelectionModel().clearSelection();
+        }
+        handleSearchStudent(null);
+    }
+
+    public void handleFindStudentByIndex(ActionEvent actionEvent) {
+        String indeks = brojIndeksaTf.getText() != null ? brojIndeksaTf.getText().trim() : "";
+        if (indeks.isEmpty()) {
+            showInfo("Unesite broj indeksa za pretragu.");
+            return;
+        }
+        try {
+            StudentDto student = studentService.findStudentByIndex(indeks);
+            if (student == null) {
+                showInfo("Student sa zadatim brojem indeksa nije pronađen.");
+                return;
+            }
+            openStudentProfile(student, indeks);
+        } catch (Exception ex) {
+            showInfo("Došlo je do greške pri pretrazi: " + ex.getMessage());
         }
     }
 
@@ -64,7 +125,91 @@ public class SearchStudentController {
         if (selected == null) {
             return;
         }
-        // TODO: When a dedicated student profile view is implemented, pass the student id via ViewState attributes.
-        mainView.navigateTo("newStudent");
+        openStudentProfile(selected, null);
+    }
+
+    public void handleOpenSelectedStudentProfile(ActionEvent actionEvent) {
+        openSelectedStudentProfile();
+    }
+
+    private void openStudentProfile(StudentDto student, String indeks) {
+        if (student == null) {
+            return;
+        }
+        if (indeks == null || indeks.isBlank()) {
+            selectedStudentStore.select(student);
+        } else {
+            selectedStudentStore.select(student, indeks);
+        }
+        mainView.navigateTo("studentProfile");
+    }
+
+    private void showInfo(String poruka) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Pretraga studenta");
+        alert.setHeaderText(null);
+        alert.setContentText(poruka);
+        alert.showAndWait();
+    }
+
+    private List<StudentDto> fetchStudents(String imeFilter, String prezimeFilter, SrednjaSkolaDto selectedSkola) {
+        if (selectedSkola != null) {
+            List<StudentDto> students = studentService.findStudentsByHighSchool(selectedSkola.getId());
+            if (!imeFilter.isEmpty() || !prezimeFilter.isEmpty()) {
+                String lowerIme = imeFilter.toLowerCase();
+                String lowerPrezime = prezimeFilter.toLowerCase();
+                return students.stream()
+                        .filter(student -> matchesNameFilters(student, lowerIme, lowerPrezime))
+                        .collect(Collectors.toList());
+            }
+            return students;
+        }
+        if (imeFilter.isEmpty() && prezimeFilter.isEmpty()) {
+            return studentService.sviStudenti();
+        }
+        return studentService.searchStudentsPaged(imeFilter, prezimeFilter);
+    }
+
+    private boolean matchesNameFilters(StudentDto student, String lowerIme, String lowerPrezime) {
+        boolean matchesIme = lowerIme.isBlank() || (student.getIme() != null && student.getIme().toLowerCase().contains(lowerIme));
+        boolean matchesPrezime = lowerPrezime.isBlank() || (student.getPrezime() != null && student.getPrezime().toLowerCase().contains(lowerPrezime));
+        return matchesIme && matchesPrezime;
+    }
+
+    private void initializeSrednjaSkolaFilter() {
+        if (srednjaSkolaFilterCb == null) {
+            return;
+        }
+        srednjaSkolaFilterCb.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(SrednjaSkolaDto item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : formatSchool(item));
+            }
+        });
+        srednjaSkolaFilterCb.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(SrednjaSkolaDto item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : formatSchool(item));
+            }
+        });
+        CompletableFuture
+                .supplyAsync(skoleService::getSrednjeSkole)
+                .thenAccept(skole -> Platform.runLater(() ->
+                        srednjaSkolaFilterCb.setItems(FXCollections.observableArrayList(skole))))
+                .exceptionally(ex -> {
+                    String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                    Platform.runLater(() -> showInfo("Greška pri učitavanju srednjih škola: " + message));
+                    return null;
+                });
+    }
+
+    private String formatSchool(SrednjaSkolaDto dto) {
+        if (dto == null) {
+            return "";
+        }
+        String mesto = dto.getMesto() == null || dto.getMesto().isBlank() ? "" : " - " + dto.getMesto();
+        return dto.getNaziv() + mesto;
     }
 }

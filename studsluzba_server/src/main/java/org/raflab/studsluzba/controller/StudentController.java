@@ -25,6 +25,12 @@ public class StudentController {
 
     private final StudentService service;
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Page<StudentDto> getStudents(Pageable pageable){
+        return service.getAll(pageable);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public StudentDto create(@RequestBody StudentDto body) {
@@ -35,6 +41,13 @@ public class StudentController {
     public Student findById(@PathVariable Long id) {
         return service.findById(id);
     }
+
+    @GetMapping("/{id}/active-index")
+    @ResponseStatus(HttpStatus.OK)
+    public String findActiveIndexValue(@PathVariable Long id) {
+        return service.findActiveIndexValue(id);
+    }
+
     @GetMapping("/find/{id}")
     public StudentDto findById2(@PathVariable Long id) {
         Student student = service.findById(id);

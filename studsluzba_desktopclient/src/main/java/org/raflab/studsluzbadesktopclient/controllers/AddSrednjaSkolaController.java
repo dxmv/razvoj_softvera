@@ -13,7 +13,7 @@ import org.raflab.studsluzbadesktopclient.coder.CoderType;
 import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
 import org.raflab.studsluzba.model.VrstaSkole;
 import org.raflab.studsluzba.model.dto.SrednjaSkolaDto;
-import org.raflab.studsluzbadesktopclient.services.SifarniciService;
+import org.raflab.studsluzbadesktopclient.services.SkoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class AddSrednjaSkolaController {
 	
 	@Autowired
-	SifarniciService sifarniciService;
+	SkoleService skoleService;
 	
 	@Autowired StudentController  studentController;
 	
@@ -43,7 +43,7 @@ public class AddSrednjaSkolaController {
 		ss.setVrsta(resolveVrsta(tipNoveSrednjeSkoleCb.getValue()));
 
 		try{
-			sifarniciService.saveSrednjaSkola(ss);
+			skoleService.saveSrednjaSkola(ss);
 			studentController.updateSrednjeSkole();
 			closeStage(event);
 		}catch (Exception e){

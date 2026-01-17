@@ -2,8 +2,6 @@ package org.raflab.studsluzbadesktopclient;
 
 import java.net.URL;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +18,7 @@ public class ContextFXMLLoader {
 
     public FXMLLoader getLoader(URL url) {
 	  FXMLLoader loader = new FXMLLoader(url);
+	  loader.setClassLoader(getClass().getClassLoader());
 	  loader.setControllerFactory(context::getBean);
 	  return loader;
 	}

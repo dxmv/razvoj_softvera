@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.CheckBoxListCell?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.RepeatYearModalController"
+      spacing="15" alignment="CENTER" prefWidth="500" prefHeight="500">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="Obnova godine studija" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" percentWidth="35"/>
+            <ColumnConstraints percentWidth="65"/>
+        </columnConstraints>
+        
+        <Label text="Indeks:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="indeksLabel" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        
+        <Label text="Godina studija:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="godinaStudijaCb" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        
+        <Label text="Datum obnove:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <DatePicker fx:id="datumObnoveDp" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        
+        <Label text="Napomena:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextArea fx:id="napomenaTa" prefRowCount="2" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    </GridPane>
+    
+    <Label text="Izaberite predmete za obnovu:" style="-fx-font-weight: bold;"/>
+    <Label fx:id="loadingLabel" text="Učitavanje predmeta..." />
+    
+    <ListView fx:id="predmetiListView" prefHeight="200" VBox.vgrow="ALWAYS"/>
+    
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="Obnovi godinu" onAction="#handleRepeat" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-padding: 8 16;"/>
+        <Button text="Otkaži" onAction="#handleCancel" style="-fx-padding: 8 16;"/>
+    </HBox>
+    
+    <Label fx:id="errorLabel" textFill="red" wrapText="true" maxWidth="450"/>
+    <Label fx:id="successLabel" textFill="green" wrapText="true" maxWidth="450"/>
+</VBox>

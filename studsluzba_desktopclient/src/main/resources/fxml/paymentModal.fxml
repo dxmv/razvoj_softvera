@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.PaymentModalController"
+      spacing="15" alignment="CENTER" prefWidth="400">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="Unos uplate" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" percentWidth="40"/>
+            <ColumnConstraints percentWidth="60"/>
+        </columnConstraints>
+        
+        <Label text="Student:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="studentLabel" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        
+        <Label text="Iznos (RSD):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="iznosTf" promptText="npr. 50000.00" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        
+        <Label text="Datum uplate:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <DatePicker fx:id="datumUplateDp" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    </GridPane>
+
+    
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="Evidentiraj uplatu" onAction="#handlePayment" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 16;"/>
+        <Button text="Otkaži" onAction="#handleCancel" style="-fx-padding: 8 16;"/>
+    </HBox>
+    
+    <Label fx:id="errorLabel" textFill="red" wrapText="true" maxWidth="350"/>
+    <Label fx:id="successLabel" textFill="green" wrapText="true" maxWidth="350"/>
+</VBox>
