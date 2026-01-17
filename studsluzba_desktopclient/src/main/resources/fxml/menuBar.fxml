@@ -21,8 +21,6 @@
             </Menu>
             <Menu text="Nastava i ispiti">
                 <items>
-                	<MenuItem text="Raspodela nastave"  />
-                	<MenuItem text="Raspodela nastave - studenti"  />
                 	<MenuItem text="Unos ispitnog roka" onAction="#openIspitniRokUnos" />
                 	<MenuItem text="Rezultati Ispita" onAction="#openRezultatiIspita" />
                     <MenuItem text="Ispiti - unos" onAction="#openIspitUnos"/>

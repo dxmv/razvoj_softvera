@@ -7,11 +7,19 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StudProgramDto;
+import org.raflab.studsluzbadesktopclient.MainView;
 import org.raflab.studsluzbadesktopclient.services.PredmetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class PredmetController {
@@ -101,6 +109,54 @@ public class PredmetController {
                         });
             }
         });
+    }
+
+    @FXML
+    private void handleGenerisiIzvestaj() {
+        StudProgramDto program = studProgramCb.getValue();
+        if (program == null) {
+            prikaziObavestenje("Greška", "Izaberite studijski program.");
+            return;
+        }
+
+        ObservableList<PredmetDto> items = predmetiTable.getItems();
+        if (items == null || items.isEmpty()) {
+            prikaziObavestenje("Greška", "Nema podataka za generisanje izveštaja. Prvo učitajte predmete.");
+            return;
+        }
+
+        // Filter out predmeti without average grades
+        List<PredmetDto> predmetiSaProsekom = items.stream()
+                .filter(p -> p.getProsecnaOcena() != null && p.getProsecnaOcena() > 0)
+                .collect(Collectors.toList());
+
+        if (predmetiSaProsekom.isEmpty()) {
+            prikaziObavestenje("Greška", "Nema predmeta sa prosečnom ocenom za izabrani period.");
+            return;
+        }
+
+        String godinaOd = godinaOdField.getText().trim();
+        String godinaDo = godinaDoField.getText().trim();
+
+        try {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("studijskiProgram", program.getNaziv());
+            parameters.put("godinaOd", godinaOd);
+            parameters.put("godinaDo", godinaDo);
+
+            JasperReport report = JasperCompileManager.compileReport(
+                    MainView.class.getResourceAsStream("/reports/predmetiStatistika.jrxml"));
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(predmetiSaProsekom);
+            JasperPrint jp = JasperFillManager.fillReport(report, parameters, dataSource);
+
+            String fileName = "predmeti_statistika_" + program.getNaziv().replaceAll("\\s+", "_") + ".pdf";
+            JasperExportManager.exportReportToPdfFile(jp, fileName);
+
+            prikaziObavestenje("Uspeh", "Izveštaj je uspešno generisan: " + fileName);
+        } catch (JRException e) {
+            prikaziObavestenje("Greška", "Greška pri generisanju izveštaja: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 

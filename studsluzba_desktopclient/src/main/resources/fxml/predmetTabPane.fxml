@@ -21,6 +21,7 @@
                 <Label text="Do godine:"/>
                 <TextField fx:id="godinaDoField" prefWidth="60" text="2026"/>
                 <Button text="Učitaj" onAction="#handleUcitajPredmete"/>
+                <Button text="Generiši PDF" onAction="#handleGenerisiIzvestaj" style="-fx-background-color: #1976D2; -fx-text-fill: white;"/>
             </HBox>
             <TableView fx:id="predmetiTable" VBox.vgrow="ALWAYS">
                 <columns>
