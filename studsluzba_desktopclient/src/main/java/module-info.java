@@ -33,6 +33,7 @@ module stud_sluzba_desktop_client {
     requires java.sql;
     requires java.desktop;
     requires spring.webflux;
+    requires com.fasterxml.jackson.databind;
 
     requires reactor.core;
     requires com.fasterxml.jackson.annotation;

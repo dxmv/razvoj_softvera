@@ -7,27 +7,12 @@
                     fx:controller="org.raflab.studsluzbadesktopclient.controllers.MenuBarController">
         <MenuBar fx:id="menuBar" style="-fx-background-color: #ADD8E6;">
 
-            <Menu text="Reports">
-                <items>
-                    <MenuItem onAction="#openReportsPage" text="Student reports" />
-                </items>
-            </Menu>
-            <Menu text="Events">
-                <items>
-                    <MenuItem onAction="#openEventsPage" text="Muse event" />
-                </items>
-            </Menu>
             <Menu text="Studenti">
                 <items>
                     <MenuItem onAction="#openSearchStudent" text="Pretraži" />   
                 </items>
             </Menu>
-            <Menu text="Nastavnici">
-                <items>
-                	<MenuItem text="Pretraži" />
-                    <MenuItem text="Novi" />
-                </items>                          
-            </Menu>
+
             <Menu text="Predmeti">
                 <items>
                     <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami" />
@@ -44,13 +29,6 @@
                     <MenuItem text="Ispiti - prijave" onAction="#openPrijavaIspita" />
                     <MenuItem text="Ispiti - rezultati" onAction="#openPregledIspita"/>
                 </items>
-            </Menu>
-            <Menu text="Administracija">
-                <items>
-                    <MenuItem text="Šifarnici" />               
-                    <MenuItem text="Školske godine"  />
-                    <MenuItem text="Korisnici" />
-                </items>                          
             </Menu>
         </MenuBar>
 </VBox>

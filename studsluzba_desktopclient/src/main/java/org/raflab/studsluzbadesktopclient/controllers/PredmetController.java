@@ -1,22 +1,17 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import org.raflab.studsluzba.model.dto.PredmetDto;
-import org.raflab.studsluzba.model.dto.StatistikaDto;
 import org.raflab.studsluzba.model.dto.StudProgramDto;
 import org.raflab.studsluzbadesktopclient.services.PredmetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class PredmetController {
@@ -27,6 +22,7 @@ public class PredmetController {
     @FXML private TableColumn<PredmetDto, String> colNaziv;
     @FXML private TableColumn<PredmetDto, Integer> colEspb;
     @FXML private TableColumn<PredmetDto, Integer> colSemestar;
+    @FXML private TableColumn<PredmetDto, Double> colProsek;
 
     @FXML private TextField nazivField;
     @FXML private TextField sifraField;
@@ -34,16 +30,10 @@ public class PredmetController {
     @FXML private TextField semestarField;
     @FXML private ComboBox<StudProgramDto> studProgramUnosCb;
 
-    @FXML private ComboBox<StudProgramDto> statProgramCb;
     @FXML private TextField godinaOdField;
     @FXML private TextField godinaDoField;
-    @FXML private TableView<StatistikaDto> statistikaTable;
-    @FXML private TableColumn<StatistikaDto, String> colStatPredmet;
-    @FXML private TableColumn<StatistikaDto, Double> colStatProsek;
-    @FXML private TableColumn<StatistikaDto, String> colStatPeriod;
 
-    @Autowired
-    private WebClient webClient;
+    @FXML private Label messageLabel;
 
     @Autowired
     private PredmetService predmetService;
@@ -53,10 +43,6 @@ public class PredmetController {
         initTableColumns();
         setupComboBoxConverters();
         ucitajSveStudijskePrograme();
-
-        studProgramCb.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) ucitajPredmeteZaPregled(newVal.getId());
-        });
     }
 
     private void initTableColumns() {
@@ -64,10 +50,7 @@ public class PredmetController {
         colNaziv.setCellValueFactory(new PropertyValueFactory<>("naziv"));
         colEspb.setCellValueFactory(new PropertyValueFactory<>("espbBodovi"));
         colSemestar.setCellValueFactory(new PropertyValueFactory<>("semestar"));
-
-        colStatPredmet.setCellValueFactory(new PropertyValueFactory<>("nazivPredmeta"));
-        colStatProsek.setCellValueFactory(new PropertyValueFactory<>("prosek"));
-        colStatPeriod.setCellValueFactory(new PropertyValueFactory<>("period"));
+        colProsek.setCellValueFactory(new PropertyValueFactory<>("prosecnaOcena"));
     }
 
     private void setupComboBoxConverters() {
@@ -81,7 +64,6 @@ public class PredmetController {
         };
         studProgramCb.setConverter(programConverter);
         studProgramUnosCb.setConverter(programConverter);
-        statProgramCb.setConverter(programConverter);
     }
 
     private void ucitajSveStudijskePrograme() {
@@ -90,37 +72,33 @@ public class PredmetController {
                 .subscribe(list -> Platform.runLater(() -> {
                     studProgramCb.setItems(FXCollections.observableArrayList(list));
                     studProgramUnosCb.setItems(FXCollections.observableArrayList(list));
-                    statProgramCb.setItems(FXCollections.observableArrayList(list));
                 }));
     }
 
-    private void ucitajPredmeteZaPregled(Long programId) {
-        predmetService.getPredmetiByProgram(programId)
-                .subscribe(list -> Platform.runLater(() ->
-                        predmetiTable.setItems(FXCollections.observableArrayList(list))));
-    }
-
     @FXML
-    private void handleIzracunajStatistiku() {
-        StudProgramDto program = statProgramCb.getValue();
+    private void handleUcitajPredmete() {
+        StudProgramDto program = studProgramCb.getValue();
         if (program == null) {
-            prikaziObavestenje("Greška", "Izaberite program u statistici.");
+            prikaziObavestenje("Greška", "Izaberite studijski program.");
             return;
         }
 
-        String gOd = godinaOdField.getText();
-        String gDo = godinaDoField.getText();
-        statistikaTable.getItems().clear();
+        String godinaOd = godinaOdField.getText().trim();
+        String godinaDo = godinaDoField.getText().trim();
 
         predmetService.getPredmetiByProgram(program.getId()).subscribe(predmeti -> {
+            ObservableList<PredmetDto> tableData = FXCollections.observableArrayList(predmeti);
+            Platform.runLater(() -> predmetiTable.setItems(tableData));
+
+            // Fetch average grades for each predmet
             for (PredmetDto p : predmeti) {
-                predmetService.getAverageOcena(p.getId(), gOd, gDo)
+                predmetService.getAverageOcena(p.getId(), godinaOd, godinaDo)
                         .subscribe(prosek -> {
-                            if (prosek != null && prosek > 0) {
-                                Platform.runLater(() -> statistikaTable.getItems().add(
-                                        new StatistikaDto(p.getNaziv(), prosek, gOd + "-" + gDo)));
-                            }
-                        }, err -> {});
+                            p.setProsecnaOcena(prosek);
+                            Platform.runLater(() -> predmetiTable.refresh());
+                        }, err -> {
+                            // If error, leave prosecnaOcena as null
+                        });
             }
         });
     }
@@ -129,20 +107,98 @@ public class PredmetController {
 
     @FXML
     private void handleSave() {
-        if (studProgramUnosCb.getValue() == null) return;
+        clearMessage();
+
+        // Validation
+        if (nazivField.getText() == null || nazivField.getText().trim().isEmpty()) {
+            showErrorMessage("Naziv predmeta je obavezan.");
+            return;
+        }
+        if (sifraField.getText() == null || sifraField.getText().trim().isEmpty()) {
+            showErrorMessage("Šifra predmeta je obavezna.");
+            return;
+        }
+        if (studProgramUnosCb.getValue() == null) {
+            showErrorMessage("Morate izabrati studijski program.");
+            return;
+        }
+
+        int espb;
+        int semestar;
+        try {
+            espb = Integer.parseInt(espbField.getText().trim());
+            if (espb <= 0) {
+                showErrorMessage("ESPB bodovi moraju biti pozitivan broj.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showErrorMessage("ESPB bodovi moraju biti validan broj.");
+            return;
+        }
+
+        try {
+            semestar = Integer.parseInt(semestarField.getText().trim());
+            if (semestar <= 0 || semestar > 8) {
+                showErrorMessage("Semestar mora biti između 1 i 8.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showErrorMessage("Semestar mora biti validan broj.");
+            return;
+        }
 
         PredmetDto dto = PredmetDto.builder()
-                .naziv(nazivField.getText())
-                .sifra(sifraField.getText())
+                .naziv(nazivField.getText().trim())
+                .sifra(sifraField.getText().trim())
                 .studijskiProgramId(studProgramUnosCb.getValue().getId())
-                .espbBodovi(Integer.parseInt(espbField.getText()))
-                .semestar(Integer.parseInt(semestarField.getText()))
+                .espbBodovi(espb)
+                .semestar(semestar)
                 .build();
 
-        predmetService.savePredmet(dto).subscribe(v -> Platform.runLater(() -> {
-            prikaziObavestenje("Uspeh", "Dodato!");
-            nazivField.clear(); sifraField.clear(); espbField.clear(); semestarField.clear();
-        }));
+        predmetService.savePredmet(dto).subscribe(
+                v -> Platform.runLater(() -> {
+                    showSuccessMessage("Predmet \"" + dto.getNaziv() + "\" je uspešno dodat.");
+                    resetForm();
+                }),
+                error -> Platform.runLater(() -> {
+                    String errorMsg = error.getMessage();
+                    if (errorMsg != null && errorMsg.contains("409")) {
+                        showErrorMessage("Predmet sa ovom šifrom već postoji.");
+                    } else if (errorMsg != null && errorMsg.contains("400")) {
+                        showErrorMessage("Neispravan zahtev. Proverite unete podatke.");
+                    } else {
+                        showErrorMessage("Greška pri čuvanju predmeta: " + (errorMsg != null ? errorMsg : "Nepoznata greška"));
+                    }
+                })
+        );
+    }
+
+    private void resetForm() {
+        nazivField.clear();
+        sifraField.clear();
+        espbField.clear();
+        semestarField.clear();
+        studProgramUnosCb.getSelectionModel().clearSelection();
+    }
+
+    private void showSuccessMessage(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.setStyle("-fx-font-size: 14px; -fx-padding: 10; -fx-text-fill: #2e7d32;");
+        }
+    }
+
+    private void showErrorMessage(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.setStyle("-fx-font-size: 14px; -fx-padding: 10; -fx-text-fill: #c62828;");
+        }
+    }
+
+    private void clearMessage() {
+        if (messageLabel != null) {
+            messageLabel.setText("");
+        }
     }
 
     private void prikaziObavestenje(String title, String content) {

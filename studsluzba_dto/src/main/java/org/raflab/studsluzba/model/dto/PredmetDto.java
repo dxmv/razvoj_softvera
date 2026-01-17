@@ -21,4 +21,5 @@ public class PredmetDto {
     private Integer brPredavanja;
     private Integer brVezbi;
     private Long studijskiProgramId;
+    private Double prosecnaOcena;
 }

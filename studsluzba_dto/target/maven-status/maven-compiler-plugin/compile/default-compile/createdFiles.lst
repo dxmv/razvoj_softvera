@@ -1,0 +1,6 @@
+org/raflab/studsluzba/model/dto/IspitPrikazDto.class
+org/raflab/studsluzba/model/dto/PrijavaIspitaPrikazDto$PrijavaIspitaPrikazDtoBuilder.class
+org/raflab/studsluzba/model/dto/IspitniRezultatDto$IspitniRezultatDtoBuilder.class
+org/raflab/studsluzba/model/dto/IspitPrikazDto$IspitPrikazDtoBuilder.class
+org/raflab/studsluzba/model/dto/IspitniRezultatDto.class
+org/raflab/studsluzba/model/dto/PrijavaIspitaPrikazDto.class

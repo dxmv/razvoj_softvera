@@ -9,6 +9,8 @@
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/ExchangeRateDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IndeksDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IspitDto.java
+/Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IspitPrikazDto.java
+/Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IspitniRezultatDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IspitniRokDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/IzlazakIspitDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/NastavnikDto.java
@@ -22,10 +24,12 @@
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/PredmetCreateDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/PredmetDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/PrijavaIspitaDto.java
+/Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/PrijavaIspitaPrikazDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/RemainingTuitionDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/RezultatIspitaStudentDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/SkolskaGodinaDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/SrednjaSkolaDto.java
+/Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/StatistikaDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/StudProgramDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/StudentDto.java
 /Users/dimitrijestepanovic/University/razvoj_softvera/studsluzba_dto/src/main/java/org/raflab/studsluzba/model/dto/StudentPredispitnaObavezaDto.java

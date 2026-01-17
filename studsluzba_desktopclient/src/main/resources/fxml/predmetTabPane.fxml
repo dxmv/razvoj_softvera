@@ -16,6 +16,11 @@
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <Label text="Studijski program:"/>
                 <ComboBox fx:id="studProgramCb" prefWidth="250"/>
+                <Label text="Od godine:"/>
+                <TextField fx:id="godinaOdField" prefWidth="60" text="2020"/>
+                <Label text="Do godine:"/>
+                <TextField fx:id="godinaDoField" prefWidth="60" text="2026"/>
+                <Button text="Učitaj" onAction="#handleUcitajPredmete"/>
             </HBox>
             <TableView fx:id="predmetiTable" VBox.vgrow="ALWAYS">
                 <columns>
@@ -23,6 +28,7 @@
                     <TableColumn fx:id="colNaziv" text="Naziv" prefWidth="250"/>
                     <TableColumn fx:id="colEspb" text="ESPB" prefWidth="70"/>
                     <TableColumn fx:id="colSemestar" text="Semestar" prefWidth="80"/>
+                    <TableColumn fx:id="colProsek" text="Prosečna ocena" prefWidth="120"/>
                 </columns>
             </TableView>
         </VBox>
@@ -50,31 +56,8 @@
                 <ComboBox fx:id="studProgramUnosCb" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="300"/>
             </GridPane>
 
+            <Label fx:id="messageLabel" style="-fx-font-size: 14px; -fx-padding: 10;" wrapText="true" maxWidth="400"/>
             <Button text="Sačuvaj predmet" onAction="#handleSave" prefWidth="150" style="-fx-font-size: 14px;"/>
-        </VBox>
-    </Tab>
-
-    <Tab fx:id="tabStatistika" text="Statistika">
-        <VBox alignment="TOP_CENTER" spacing="10">
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
-            <HBox spacing="10" alignment="CENTER">
-                <Label text="Studijski program:"/>
-                <ComboBox fx:id="statProgramCb" prefWidth="200"/>
-                <Label text="Od godine:"/>
-                <TextField fx:id="godinaOdField" prefWidth="60" text="2020"/>
-                <Label text="Do godine:"/>
-                <TextField fx:id="godinaDoField" prefWidth="60" text="2026"/>
-                <Button text="Generiši izveštaj" onAction="#handleIzracunajStatistiku"/>
-            </HBox>
-            <TableView fx:id="statistikaTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colStatPredmet" text="Predmet" prefWidth="250"/>
-                    <TableColumn fx:id="colStatProsek" text="Prosečna ocena" prefWidth="120"/>
-                    <TableColumn fx:id="colStatPeriod" text="Period" prefWidth="150"/>
-                </columns>
-            </TableView>
         </VBox>
     </Tab>
 </TabPane>

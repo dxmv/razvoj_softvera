@@ -75,4 +75,15 @@ public class PredmetService {
                 .retrieve()
                 .bodyToFlux(PredmetDto.class);
     }
+
+    public Flux<PredmetDto> findPredmetsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Flux.empty();
+        }
+        return webClient.post()
+                .uri(PREDMETI_BASE_PATH + "/by-ids")
+                .bodyValue(ids)
+                .retrieve()
+                .bodyToFlux(PredmetDto.class);
+    }
 }
