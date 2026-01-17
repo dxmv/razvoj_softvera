@@ -3,6 +3,7 @@ package org.raflab.studsluzbadesktopclient.controllers;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -38,18 +39,26 @@ public class StudProgramiController {
 
     @FXML
     private void loadData() {
+        studProgramService.getAllStudijskiProgrami()
+                .collectList()
+                .subscribe(
+                        lista -> {
+                            Platform.runLater(() ->
+                                    tabelaProgrami.setItems(FXCollections.observableArrayList(lista))
+                            );
+                        },
+                        err -> {
+                            Platform.runLater(() -> prikaziGresku(err));
+                        }
+                );
+    }
 
-        CompletableFuture.supplyAsync(() -> studProgramService.getSudijskiProgramiSorted())
-                .thenAccept(list -> {
-                    if (list != null) {
-                        Platform.runLater(() ->
-                                tabelaProgrami.setItems(FXCollections.observableArrayList(list))
-                        );
-                    }
-                })
-                .exceptionally(ex -> {
-                    ex.printStackTrace();
-                    return null;
-                });
+    private void prikaziGresku(Throwable err) {
+        err.printStackTrace();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Greška pri učitavanju");
+        alert.setHeaderText("Nije moguće dohvatiti studijske programe");
+        alert.setContentText(err.getMessage());
+        alert.showAndWait();
     }
 }
