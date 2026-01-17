@@ -91,9 +91,11 @@ public class MainView {
                 new KeyCodeCombination(KeyCode.CLOSE_BRACKET, KeyCombination.CONTROL_DOWN),
                 navigationService::forward);
 
+        // Touch screen swipe events (direct touch only)
         targetScene.addEventFilter(SwipeEvent.ANY, event -> {
-            boolean requestBack = event.getEventType() == SwipeEvent.SWIPE_LEFT;
-            boolean requestForward = event.getEventType() == SwipeEvent.SWIPE_RIGHT;
+            // Swipe right = back (like browser), swipe left = forward
+            boolean requestBack = event.getEventType() == SwipeEvent.SWIPE_RIGHT;
+            boolean requestForward = event.getEventType() == SwipeEvent.SWIPE_LEFT;
             if (!requestBack && !requestForward) {
                 return;
             }
@@ -107,18 +109,23 @@ public class MainView {
             }
         });
 
+        // Trackpad two-finger horizontal scroll/swipe gesture
         targetScene.addEventFilter(ScrollEvent.SCROLL, event -> {
-            if (!event.isDirect()) {
-                return;
-            }
+            // Only handle horizontal scroll that's primarily horizontal (not vertical scrolling)
             double absX = Math.abs(event.getDeltaX());
-            if (absX < MIN_HORIZONTAL_SCROLL_DELTA || absX < Math.abs(event.getDeltaY())) {
+            double absY = Math.abs(event.getDeltaY());
+            
+            // Require significant horizontal movement and it must be more horizontal than vertical
+            if (absX < MIN_HORIZONTAL_SCROLL_DELTA || absX < absY * 1.5) {
                 return;
             }
+            
             if (!allowGestureTrigger()) {
-                event.consume();
                 return;
             }
+            
+            // Positive deltaX = swiping right (fingers move right) = go back
+            // Negative deltaX = swiping left (fingers move left) = go forward
             boolean handled = event.getDeltaX() > 0 ? navigationService.back() : navigationService.forward();
             if (handled) {
                 event.consume();
