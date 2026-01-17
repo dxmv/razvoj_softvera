@@ -20,7 +20,6 @@
                     <TableColumn fx:id="espbCol" text="ESPB" prefWidth="80"/>
                 </columns>
             </TableView>
-            <Button text="Osveži" onAction="#loadData"/>
         </VBox>
     </center>
 </BorderPane>

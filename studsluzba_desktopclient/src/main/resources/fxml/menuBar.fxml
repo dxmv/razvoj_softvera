@@ -30,7 +30,7 @@
             </Menu>
             <Menu text="Predmeti">
                 <items>
-<!--                    <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami" />-->
+                    <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami" />
                     <MenuItem text="Predmeti" onAction="#openPredmetiPoProgramu"/>
                 </items>                          
             </Menu>

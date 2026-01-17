@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -78,5 +79,11 @@ public class StudProgramService {
 				.retrieve()
 				.toBodilessEntity()
 				.then();
+	}
+	public Flux<StudProgramDto> getAllStudijskiProgrami() {
+		return webClient.get()
+				.uri("/api/stud-programi")
+				.retrieve()
+				.bodyToFlux(StudProgramDto.class);
 	}
 }
