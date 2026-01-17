@@ -10,6 +10,7 @@ import org.raflab.studsluzba.model.dto.PrijavaIspitaDto;
 import org.raflab.studsluzba.model.dto.PrijavaIspitaPrikazDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.repositories.IspitRepository;
+import org.raflab.studsluzba.repositories.PolozenPredmetRepository;
 import org.raflab.studsluzba.repositories.PrijavaIspitaRepository;
 import org.raflab.studsluzba.repositories.StudentPredmetRepository;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ public class PrijavaIspitaService {
     private final PrijavaIspitaRepository repository;
     private final IspitRepository ispitRepository;
     private final StudentPredmetRepository studentPredmetRepository;
+    private final PolozenPredmetRepository polozenPredmetRepository;
 
 
     public PrijavaIspita create(PrijavaIspita entity) {
@@ -89,6 +91,13 @@ public class PrijavaIspitaService {
                         predmetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Student ne slusa ovaj predmet"));
+
+        // Check if student has already passed this course
+        if (polozenPredmetRepository.existsByStudentskiIndeksAndPredmet(
+                studentPredmet.getIndeks(), ispit.getPredmet())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Student je vec polozio ovaj predmet");
+        }
 
         if (repository.existsByIspitAndStudentskiIndeks(ispit, studentPredmet.getIndeks())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

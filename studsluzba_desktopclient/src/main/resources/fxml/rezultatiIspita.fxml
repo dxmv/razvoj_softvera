@@ -21,6 +21,7 @@
                 <ComboBox fx:id="cbIspiti" prefWidth="250" promptText="Izaberi ispit"/>
 
                 <Button text="Prikaži rezultate" onAction="#handlePrikazi"/>
+                <Button text="Štampaj zapisnik" onAction="#handleStampajZapisnik" style="-fx-background-color: #1976D2; -fx-text-fill: white;"/>
             </HBox>
 
             <TableView fx:id="tblRezultati" VBox.vgrow="ALWAYS">

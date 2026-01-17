@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="zapisnikSaIspita" 
+              pageWidth="595" 
+              pageHeight="842" 
+              columnWidth="555" 
+              leftMargin="20" 
+              rightMargin="20" 
+              topMargin="20" 
+              bottomMargin="20">
+
+    <parameter name="nazivPredmeta" class="java.lang.String"/>
+    <parameter name="datumIspita" class="java.lang.String"/>
+    <parameter name="ispitniRok" class="java.lang.String"/>
+
+    <field name="indeks" class="java.lang.String"/>
+    <field name="student" class="java.lang.String"/>
+    <field name="studProgram" class="java.lang.String"/>
+    <field name="poeniPredispitni" class="java.lang.Double"/>
+    <field name="poeniIspit" class="java.lang.Double"/>
+    <field name="ukupno" class="java.lang.Double"/>
+    <field name="ocena" class="java.lang.Integer"/>
+
+    <variable name="rowNumber" class="java.lang.Integer" resetType="Report" calculation="Count">
+        <variableExpression><![CDATA[Boolean.TRUE]]></variableExpression>
+        <initialValueExpression><![CDATA[0]]></initialValueExpression>
+    </variable>
+
+    <title>
+        <band height="120" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="10" width="555" height="35"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="22" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ZAPISNIK SA ISPITA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="20" y="55" width="80" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Predmet:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="55" width="435" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{nazivPredmeta}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="20" y="75" width="80" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Datum:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="75" width="150" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{datumIspita}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="270" y="75" width="80" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Ispitni rok:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="350" y="75" width="185" height="20"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{ispitniRok}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="30" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="30" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[R.br.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="0" width="80" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Indeks]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="110" y="0" width="150" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Student]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="260" y="0" width="70" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Predispit.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="330" y="0" width="70" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Ispit]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="400" y="0" width="70" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Ukupno]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="470" y="0" width="85" height="30" backcolor="#DDDDDD" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Ocena]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="25" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="30" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{rowNumber}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="30" y="0" width="80" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{indeks}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="110" y="0" width="150" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle">
+                    <font size="9"/>
+                    <paragraph leftIndent="3"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{student}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#0.00" isBlankWhenNull="true">
+                <reportElement x="260" y="0" width="70" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{poeniPredispitni}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#0.00" isBlankWhenNull="true">
+                <reportElement x="330" y="0" width="70" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{poeniIspit}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#0.00" isBlankWhenNull="true">
+                <reportElement x="400" y="0" width="70" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{ukupno}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="470" y="0" width="85" height="25"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{ocena}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="50">
+            <textField>
+                <reportElement x="0" y="30" width="555" height="20"/>
+                <textElement textAlignment="Center">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Strana " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="60">
+            <staticText>
+                <reportElement x="300" y="30" width="100" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <text><![CDATA[Potpis nastavnika:]]></text>
+            </staticText>
+            <line>
+                <reportElement x="410" y="45" width="130" height="1"/>
+            </line>
+        </band>
+    </summary>
+</jasperReport>
