@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane fx:id="mainPane" prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.IspitUnosController">
+
+    <top>
+        <fx:include source="menuBar.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="20.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="40.0" right="40.0" bottom="20.0" left="40.0" />
+            </padding>
+
+            <Label text="Unos Novog Ispita" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+            <Separator maxWidth="500.0" />
+
+            <GridPane hgap="15.0" vgap="20.0" alignment="CENTER">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150.0" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" maxWidth="350.0" />
+                </columnConstraints>
+
+                <Label text="Ispitni rok:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="ispitniRokCb" prefWidth="350.0" promptText="Izaberite ispitni rok"
+                          GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+                <Label text="Predmet:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="predmetCb" prefWidth="350.0" promptText="Izaberite predmet"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+                <Label text="Datum održavanja:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="datumPicker" prefWidth="350.0" promptText="Izaberite datum"
+                            GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+                <Label text="Vreme početka:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <HBox spacing="10.0" alignment="CENTER_LEFT" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                    <ComboBox fx:id="satiCb" prefWidth="90.0" promptText="HH" />
+                    <Label text=":" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+                    <ComboBox fx:id="minutiCb" prefWidth="90.0" promptText="mm" />
+                </HBox>
+
+                <VBox spacing="10" alignment="CENTER" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                    <padding>
+                        <Insets top="10.0" />
+                    </padding>
+                    <Button text="SAČUVAJ ISPIT" onAction="#handleSave"
+                            prefWidth="200.0" prefHeight="40.0"
+                            style="-fx-background-color: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 5;"/>
+                </VBox>
+
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>

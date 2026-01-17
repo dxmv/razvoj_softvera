@@ -3,6 +3,7 @@ package org.raflab.studsluzba.controller;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.PrijavaIspita;
 import org.raflab.studsluzba.model.dto.PrijavaIspitaDto;
+import org.raflab.studsluzba.model.dto.PrijavaIspitaPrikazDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.service.PrijavaIspitaService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,11 @@ public class PrijavaIspitaController {
     @ResponseStatus(HttpStatus.OK)
     public List<StudentDto> getPrijavljeniZaIspit(@PathVariable Long ispitId) {
         return service.findPrijavljeniZaIspit(ispitId);
+    }
+    @GetMapping("/{ispitId}/prijavljeni2")
+    @ResponseStatus(HttpStatus.OK)
+    public List<PrijavaIspitaPrikazDto> getPrijavljeniZaIspit2(@PathVariable Long ispitId) {
+        return service.findPrijavljeniZaIspit2(ispitId);
     }
     @PostMapping("/prijavi")
     @ResponseStatus(HttpStatus.CREATED)

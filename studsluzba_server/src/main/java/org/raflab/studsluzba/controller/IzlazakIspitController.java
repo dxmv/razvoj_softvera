@@ -2,10 +2,14 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.IzlazakIspit;
+import org.raflab.studsluzba.model.dto.IspitniRezultatDto;
 import org.raflab.studsluzba.model.dto.IzlazakIspitDto;
 import org.raflab.studsluzba.service.IzlazakIspitService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/izlasci-na-ispit")
@@ -47,5 +51,10 @@ public class IzlazakIspitController {
     public Long getBrojIzlasakaNaPredmet(@RequestParam Long indeksId,
                                          @RequestParam Long predmetId) {
         return service.getBrojIzlasakaNaPredmet(indeksId, predmetId);
+    }
+
+    @GetMapping("/rezultati/{ispitId}")
+    public List<IspitniRezultatDto> getRezultatiIspita(@PathVariable Long ispitId) {
+        return service.getSortiraniRezultati(ispitId);
     }
 }

@@ -2,6 +2,7 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.NastavnikPredmet;
+import org.raflab.studsluzba.model.dto.NastavnikDto;
 import org.raflab.studsluzba.service.NastavnikPredmetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +34,11 @@ public class NastavnikPredmetController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/by-predmet")
+    @ResponseStatus(HttpStatus.OK)
+    public Long findNastavnikIdByPredmetIdByPredmet(@RequestParam Long predmetId) {
+        return service.getNastavnikIdByPredmet(predmetId);
     }
 }

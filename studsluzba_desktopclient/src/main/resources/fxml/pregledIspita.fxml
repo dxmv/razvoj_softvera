@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane fx:id="pregledIspita" prefHeight="600.0" prefWidth="900.0"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.IspitPregledController">
+
+    <top>
+        <fx:include source="menuBar.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="20.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="30.0" right="30.0" bottom="20.0" left="30.0" />
+            </padding>
+
+            <Label text="Pregled Prijavljenih Studenata" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+            <GridPane hgap="15.0" vgap="10.0" alignment="CENTER">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120.0" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" maxWidth="400.0" />
+                </columnConstraints>
+
+                <Label text="Ispitni rok:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <ComboBox fx:id="rokCb" prefWidth="300.0" promptText="Izaberite ispitni rok" />
+                    <Button fx:id="ucitajIspiteBtn" text="Učitaj ispite" onAction="#handleUcitajIspite"></Button>
+                </HBox>
+
+                <Label text="Ispit (Predmet):" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <ComboBox fx:id="ispitCb" prefWidth="400.0" promptText="Prvo učitajte ispite za rok"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1" />
+            </GridPane>
+
+            <Separator />
+
+            <TableView fx:id="studentiTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="indeksCol" text="Indeks" prefWidth="150.0">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="indeksPrikaz" />
+                        </cellValueFactory>
+                    </TableColumn>
+
+                    <TableColumn fx:id="imeCol" text="Ime" prefWidth="200.0">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="ime" />
+                        </cellValueFactory>
+                    </TableColumn>
+
+                    <TableColumn fx:id="prezimeCol" text="Prezime" prefWidth="200.0">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="prezime" />
+                        </cellValueFactory>
+                    </TableColumn>
+
+                    <TableColumn fx:id="datumPrijaveCol" text="Datum Prijave" prefWidth="150.0">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="datumPrijave" />
+                        </cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label text="Izaberite ispitni rok i ispit za prikaz studenata." />
+                </placeholder>
+            </TableView>
+
+            <HBox alignment="CENTER_RIGHT">
+                <Label fx:id="countLabel" text="Ukupno prijavljenih: 0" style="-fx-font-weight: bold;" />
+            </HBox>
+
+        </VBox>
+    </center>
+</BorderPane>

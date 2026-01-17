@@ -1,5 +1,7 @@
 package org.raflab.studsluzbadesktopclient.utils;
 
+import javafx.scene.control.Alert;
+
 public class StringUtils {
 
 	public static boolean allContains(String filter, Object ...objects ) {
@@ -16,5 +18,12 @@ public class StringUtils {
 				return true;
 		}
 		return false;
+	}
+	public void prikaziPoruku(String title, String content, Alert.AlertType type) {
+		Alert alert = new Alert(type);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(content);
+		alert.show();
 	}
 }

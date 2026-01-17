@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.awt.*;
+import java.util.List;
 
 public interface PredmetRepository extends JpaRepository<Predmet, Long> {
     @Query("SELECT p FROM Predmet p WHERE p.studijskiProgram.id = :studProgramId")
@@ -16,4 +17,6 @@ public interface PredmetRepository extends JpaRepository<Predmet, Long> {
     Page<Predmet> findByStudijskiProgram_Id(Long studijskiProgramId, Pageable pageable);
 
     boolean existsBySifra(String sifra);
+
+    List<Predmet> findAllByOrderByNazivAsc();
 }

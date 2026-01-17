@@ -10,6 +10,7 @@ import javafx.util.StringConverter;
 import org.raflab.studsluzba.model.dto.PredmetDto;
 import org.raflab.studsluzba.model.dto.StatistikaDto;
 import org.raflab.studsluzba.model.dto.StudProgramDto;
+import org.raflab.studsluzbadesktopclient.services.PredmetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -43,6 +44,9 @@ public class PredmetController {
 
     @Autowired
     private WebClient webClient;
+
+    @Autowired
+    private PredmetService predmetService;
 
     @FXML
     public void initialize() {
@@ -81,8 +85,8 @@ public class PredmetController {
     }
 
     private void ucitajSveStudijskePrograme() {
-        webClient.get().uri("/api/stud-programi").retrieve()
-                .bodyToFlux(StudProgramDto.class).collectList()
+        predmetService.getAllStudijskiProgrami()
+                .collectList()
                 .subscribe(list -> Platform.runLater(() -> {
                     studProgramCb.setItems(FXCollections.observableArrayList(list));
                     studProgramUnosCb.setItems(FXCollections.observableArrayList(list));
@@ -91,8 +95,9 @@ public class PredmetController {
     }
 
     private void ucitajPredmeteZaPregled(Long programId) {
-        getPredmetiByProgram(programId).subscribe(list ->
-                Platform.runLater(() -> predmetiTable.setItems(FXCollections.observableArrayList(list))));
+        predmetService.getPredmetiByProgram(programId)
+                .subscribe(list -> Platform.runLater(() ->
+                        predmetiTable.setItems(FXCollections.observableArrayList(list))));
     }
 
     @FXML
@@ -107,16 +112,9 @@ public class PredmetController {
         String gDo = godinaDoField.getText();
         statistikaTable.getItems().clear();
 
-        getPredmetiByProgram(program.getId()).subscribe(predmeti -> {
+        predmetService.getPredmetiByProgram(program.getId()).subscribe(predmeti -> {
             for (PredmetDto p : predmeti) {
-                webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/api/polozeni-predmeti/averageOcena")
-                                .queryParam("predmetId", p.getId())
-                                .queryParam("godinaOd", gOd)
-                                .queryParam("godinaDo", gDo).build())
-                        .retrieve()
-                        .bodyToMono(Double.class)
+                predmetService.getAverageOcena(p.getId(), gOd, gDo)
                         .subscribe(prosek -> {
                             if (prosek != null && prosek > 0) {
                                 Platform.runLater(() -> statistikaTable.getItems().add(
@@ -127,39 +125,24 @@ public class PredmetController {
         });
     }
 
-    private reactor.core.publisher.Mono<List<PredmetDto>> getPredmetiByProgram(Long programId) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/predmeti/by-stud-program")
-                        .queryParam("studProgramId", programId).build())
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .map(node -> {
-                    List<PredmetDto> list = new ArrayList<>();
-                    JsonNode content = node.get("content");
-                    if (content != null && content.isArray()) {
-                        content.forEach(p -> list.add(PredmetDto.builder()
-                                .id(p.get("id").asLong()).sifra(p.get("sifra").asText())
-                                .naziv(p.get("naziv").asText()).espbBodovi(p.get("espbBodovi").asInt())
-                                .semestar(p.get("semestar").asInt()).build()));
-                    }
-                    return list;
-                });
-    }
+
 
     @FXML
     private void handleSave() {
         if (studProgramUnosCb.getValue() == null) return;
+
         PredmetDto dto = PredmetDto.builder()
-                .naziv(nazivField.getText()).sifra(sifraField.getText())
+                .naziv(nazivField.getText())
+                .sifra(sifraField.getText())
                 .studijskiProgramId(studProgramUnosCb.getValue().getId())
                 .espbBodovi(Integer.parseInt(espbField.getText()))
-                .semestar(Integer.parseInt(semestarField.getText())).build();
+                .semestar(Integer.parseInt(semestarField.getText()))
+                .build();
 
-        webClient.post().uri("/api/predmeti/create").bodyValue(dto).retrieve().toBodilessEntity()
-                .subscribe(r -> Platform.runLater(() -> {
-                    prikaziObavestenje("Uspeh", "Dodato!");
-                    nazivField.clear(); sifraField.clear(); espbField.clear(); semestarField.clear();
-                }));
+        predmetService.savePredmet(dto).subscribe(v -> Platform.runLater(() -> {
+            prikaziObavestenje("Uspeh", "Dodato!");
+            nazivField.clear(); sifraField.clear(); espbField.clear(); semestarField.clear();
+        }));
     }
 
     private void prikaziObavestenje(String title, String content) {

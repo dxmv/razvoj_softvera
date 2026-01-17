@@ -1,6 +1,7 @@
 package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzba.mapper.EntityMapper;
 import org.raflab.studsluzba.model.Student;
 import org.raflab.studsluzba.model.dto.ObnovaGodineDto;
 import org.raflab.studsluzba.model.dto.ObnovaGodineRequest;
@@ -34,7 +35,11 @@ public class StudentController {
     public Student findById(@PathVariable Long id) {
         return service.findById(id);
     }
-
+    @GetMapping("/find/{id}")
+    public StudentDto findById2(@PathVariable Long id) {
+        Student student = service.findById(id);
+        return EntityMapper.toDto(student);
+    }
     @PutMapping("/{id}")
     public StudentDto update(@PathVariable Long id, @RequestBody StudentDto body) {
         return service.update(id, body);
@@ -110,5 +115,6 @@ public class StudentController {
     public List<StudentDto> findEnrolledByHighSchool(@PathVariable Long srednjaId) {
         return service.findEnrolledByHighSchool(srednjaId);
     }
+
 
 }

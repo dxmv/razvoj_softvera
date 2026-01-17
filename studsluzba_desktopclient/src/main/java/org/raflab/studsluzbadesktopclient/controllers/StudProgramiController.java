@@ -1,15 +1,21 @@
 package org.raflab.studsluzbadesktopclient.controllers;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.dto.StudProgramDto;
+import org.raflab.studsluzbadesktopclient.services.StudProgramService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
+@RequiredArgsConstructor
 public class StudProgramiController {
 
     @FXML private TableView<StudProgramDto> tabelaProgrami;
@@ -18,11 +24,7 @@ public class StudProgramiController {
     @FXML private TableColumn<StudProgramDto, String> zvanjeCol;
     @FXML private TableColumn<StudProgramDto, Integer> espbCol;
 
-    private final WebClient webClient;
-
-    public StudProgramiController(WebClient webClient) {
-        this.webClient = webClient;
-    }
+    private final StudProgramService studProgramService;
 
     @FXML
     public void initialize() {
@@ -36,11 +38,18 @@ public class StudProgramiController {
 
     @FXML
     private void loadData() {
-        webClient.get()
-                .uri("/api/stud-programi")
-                .retrieve()
-                .bodyToFlux(StudProgramDto.class)
-                .collectList()
-                .subscribe(list -> Platform.runLater(() -> tabelaProgrami.getItems().setAll(list)));
+
+        CompletableFuture.supplyAsync(() -> studProgramService.getSudijskiProgramiSorted())
+                .thenAccept(list -> {
+                    if (list != null) {
+                        Platform.runLater(() ->
+                                tabelaProgrami.setItems(FXCollections.observableArrayList(list))
+                        );
+                    }
+                })
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
     }
 }

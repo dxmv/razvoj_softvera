@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="mainPane" prefHeight="500.0" prefWidth="700.0"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.IspitniRokUnosController">
+
+    <top>
+        <fx:include source="menuBar.fxml"/>
+    </top>
+
+    <center>
+        <VBox spacing="25.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="50.0" right="50.0" bottom="30.0" left="50.0" />
+            </padding>
+
+            <Label text="Unos Novog Ispitnog Roka" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+            <Separator maxWidth="450.0" />
+
+            <GridPane hgap="20.0" vgap="20.0" alignment="CENTER">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150.0" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" />
+                </columnConstraints>
+
+                <Label text="Školska godina:" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <font><Font name="System Bold" size="13.0" /></font>
+                </Label>
+                <ComboBox fx:id="skGodinaCb" prefWidth="300.0" promptText="Izaberite školsku godinu"
+                          GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+                <Label text="Datum početka:" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <font><Font name="System Bold" size="13.0" /></font>
+                </Label>
+                <DatePicker fx:id="pocetakPicker" prefWidth="300.0" promptText="Kliknite za izbor"
+                            GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+                <Label text="Datum završetka:" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                    <font><Font name="System Bold" size="13.0" /></font>
+                </Label>
+                <DatePicker fx:id="krajPicker" prefWidth="300.0" promptText="Kliknite za izbor"
+                            GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+                <Button text="SAČUVAJ ROK" onAction="#handleSave"
+                        prefWidth="180.0" prefHeight="40.0"
+                        style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
+                        GridPane.rowIndex="3" GridPane.columnIndex="1" />
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>

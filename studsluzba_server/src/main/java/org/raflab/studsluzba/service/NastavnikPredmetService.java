@@ -2,6 +2,7 @@ package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.NastavnikPredmet;
+import org.raflab.studsluzba.model.dto.NastavnikDto;
 import org.raflab.studsluzba.repositories.NastavnikPredmetRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,5 +34,12 @@ public class NastavnikPredmetService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "NastavnikPredmet not found: " + id);
         }
         repository.deleteById(id);
+    }
+
+
+
+    public Long getNastavnikIdByPredmet(Long predmetId) {
+        return repository.findNastavnikIdByPredmetId(predmetId);
+
     }
 }

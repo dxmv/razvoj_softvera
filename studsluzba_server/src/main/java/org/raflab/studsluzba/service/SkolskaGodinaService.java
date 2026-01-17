@@ -1,11 +1,16 @@
 package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzba.mapper.EntityMapper;
 import org.raflab.studsluzba.model.SkolskaGodina;
+import org.raflab.studsluzba.model.dto.SkolskaGodinaDto;
 import org.raflab.studsluzba.repositories.SkolskaGodinaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +38,11 @@ public class SkolskaGodinaService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "SkolskaGodina not found: " + id);
         }
         repository.deleteById(id);
+    }
+
+    public List<SkolskaGodinaDto> findAll() {
+        return repository.findAll().stream()
+                .map(entity -> EntityMapper.toDto(entity))
+                .collect(Collectors.toList());
     }
 }

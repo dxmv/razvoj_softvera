@@ -28,4 +28,5 @@ module stud_sluzba_desktop_client {
 
     requires reactor.core;
     requires com.fasterxml.jackson.databind;
+    requires org.reactivestreams;
 }
