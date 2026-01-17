@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,5 +102,11 @@ public class PredmetService {
         Double avg = polozenPredmetRepository.findProsecnaOcenaZaPredmetUGodinama(predmetId, yearFrom, yearTo);
         return avg != null ? avg : 0.0;
     }
+    public List<PredmetDto> getAllPredmetiAsList() {
+        List<Predmet> predmeti = repository.findAllByOrderByNazivAsc();
 
+        return predmeti.stream()
+                .map(EntityMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

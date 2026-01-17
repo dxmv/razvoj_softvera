@@ -6,6 +6,8 @@ import org.raflab.studsluzba.service.StudProgramService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/stud-programi")
 @RequiredArgsConstructor
@@ -33,5 +35,9 @@ public class StudProgramController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+    @GetMapping // Ova anotacija bez putanje reaguje na /api/stud-programi
+    public List<StudProgram> findAll() {
+        return service.findAll(); // Proveri da li servis ima ovu metodu
     }
 }

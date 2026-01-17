@@ -34,4 +34,8 @@ public class IndeksController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+    @GetMapping("/student/{studentId}/aktivan")
+    public Long getAktivniIndeksId(@PathVariable Long studentId) {
+        return service.getAktivniIndeksIdZaStudenta(studentId);
+    }
 }

@@ -2,6 +2,7 @@ package org.raflab.studsluzba.service;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.Indeks;
+import org.raflab.studsluzba.model.StatusIndeksa;
 import org.raflab.studsluzba.repositories.StudentskiIndeksRepository;
 import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,16 @@ public class IndeksService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Indeks not found: " + id);
         }
         repository.deleteById(id);
+    }
+
+    public Long getAktivniIndeksIdZaStudenta(Long studentId) {
+        Indeks indeks = repository.findByStudentIdAndStatus(studentId, StatusIndeksa.AKTIVAN);
+
+        if (indeks == null) {
+            throw new RuntimeException("Student nema aktivan indeks!");
+        }
+
+        return indeks.getId();
     }
 
     public Indeks findByShort(String indeks) {

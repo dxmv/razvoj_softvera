@@ -2,9 +2,12 @@ package org.raflab.studsluzba.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.model.SkolskaGodina;
+import org.raflab.studsluzba.model.dto.SkolskaGodinaDto;
 import org.raflab.studsluzba.service.SkolskaGodinaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/skolske-godine")
@@ -33,5 +36,10 @@ public class SkolskaGodinaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/all")
+    public List<SkolskaGodinaDto> findAll() {
+        return service.findAll();
     }
 }

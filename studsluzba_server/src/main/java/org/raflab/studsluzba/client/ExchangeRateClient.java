@@ -1,5 +1,6 @@
 package org.raflab.studsluzba.client;
 
+
 import org.raflab.studsluzba.model.dto.ExchangeRateDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

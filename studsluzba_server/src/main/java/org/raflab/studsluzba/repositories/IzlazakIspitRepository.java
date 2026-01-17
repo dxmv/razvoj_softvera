@@ -22,4 +22,16 @@ public interface IzlazakIspitRepository extends JpaRepository<IzlazakIspit, Long
             "AND pi.ispit.predmet.id = :predmetId")
     Long countByStudentAndPredmet(@Param("indeksId") Long indeksId,
                                   @Param("predmetId") Long predmetId);
+
+
+
 }
+
+
+
+
+
+
+
+
+

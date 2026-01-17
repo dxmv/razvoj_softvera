@@ -24,9 +24,9 @@ module stud_sluzba_desktop_client {
     opens org.raflab.studsluzbadesktopclient.coder to javafx.fxml, spring.beans, spring.context, spring.core;
 
     //reports
-    requires java.sql;
-    requires java.desktop;
     requires spring.webflux;
 
     requires reactor.core;
+    requires com.fasterxml.jackson.databind;
+    requires org.reactivestreams;
 }
