@@ -109,4 +109,10 @@ public class PredmetService {
                 .map(EntityMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<PredmetDto> findByIds(List<Long> ids) {
+        return repository.findAllById(ids).stream()
+                .map(EntityMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

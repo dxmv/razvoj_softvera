@@ -69,4 +69,10 @@ public class PredmetController {
     public List<PredmetDto> getAllPredmetiList() {
         return service.getAllPredmetiAsList();
     }
+
+    @PostMapping("/by-ids")
+    @ResponseStatus(HttpStatus.OK)
+    public List<PredmetDto> findByIds(@RequestBody List<Long> ids) {
+        return service.findByIds(ids);
+    }
 }

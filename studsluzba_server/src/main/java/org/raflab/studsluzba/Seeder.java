@@ -559,15 +559,15 @@ public class Seeder implements CommandLineRunner {
         obnovaStudent2.getPredmeti().add(bp);
         obnovaGodineRepository.save(obnovaStudent2);
 
-        ObnovaGodine obnovaStudent1 = ObnovaGodine.builder()
-                .studentskiIndeks(indeks1)
-                .skolskaGodina(skolskaGodina2223)
-                .godinaStudija(1)
-                .datumObnove(LocalDate.of(2022, 9, 29))
-                .napomena("Obnova prve godine zbog nedovoljnih bodova")
-                .build();
-        obnovaStudent1.getPredmeti().add(mat1);
-        obnovaGodineRepository.save(obnovaStudent1);
+//        ObnovaGodine obnovaStudent1 = ObnovaGodine.builder()
+//                .studentskiIndeks(indeks1)
+//                .skolskaGodina(skolskaGodina2223)
+//                .godinaStudija(1)
+//                .datumObnove(LocalDate.of(2022, 9, 29))
+//                .napomena("Obnova prve godine zbog nedovoljnih bodova")
+//                .build();
+//        obnovaStudent1.getPredmeti().add(mat1);
+//        obnovaGodineRepository.save(obnovaStudent1);
 
         ObnovaGodine obnovaStudent3 = ObnovaGodine.builder()
                 .studentskiIndeks(indeks3b)
