@@ -19,13 +19,13 @@
                     <MenuItem text="Predmeti" onAction="#openPredmetiPoProgramu"/>
                 </items>                          
             </Menu>
-            <Menu text="Nastava i ispiti">
+            <Menu text="Ispiti">
                 <items>
                 	<MenuItem text="Unos ispitnog roka" onAction="#openIspitniRokUnos" />
-                	<MenuItem text="Rezultati Ispita" onAction="#openRezultatiIspita" />
                     <MenuItem text="Ispiti - unos" onAction="#openIspitUnos"/>
                     <MenuItem text="Ispiti - prijave" onAction="#openPrijavaIspita" />
-                    <MenuItem text="Ispiti - rezultati" onAction="#openPregledIspita"/>
+                    <MenuItem text="Pregled prijavljenih" onAction="#openPregledIspita"/>
+                    <MenuItem text="Rezultati Ispita" onAction="#openRezultatiIspita" />
                 </items>
             </Menu>
         </MenuBar>

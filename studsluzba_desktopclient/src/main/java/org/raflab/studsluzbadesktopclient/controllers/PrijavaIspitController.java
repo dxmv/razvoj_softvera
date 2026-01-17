@@ -21,12 +21,10 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class PrijavaIspitController {
 
-    @FXML private TextField indeksTf;
+    @FXML private ComboBox<StudentDto> studentCb;
     @FXML private ComboBox<IspitniRokDto> rokCb;
     @FXML private ComboBox<IspitPrikazDto> ispitCb;
-    @FXML private Button proveriBtn;
     @FXML private Button prijaviBtn;
-    @FXML private Label studentInfoLbl;
 
     private final PrijavaIspitaService prijavaIspitService;
     private final IspitniRokService ispitniRokService;
@@ -35,12 +33,11 @@ public class PrijavaIspitController {
     private final StringUtils stringUtils = new StringUtils();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    private StudentDto pronadjeniStudent;
-
     @FXML
     public void initialize() {
         initConverters();
         loadRokovi();
+        loadStudenti();
         setupListeners();
 
         prijaviBtn.setDisable(true);
@@ -53,39 +50,43 @@ public class PrijavaIspitController {
                 ucitajIspite(newVal.getId());
             }
         });
+
+        studentCb.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updatePrijaviButtonState();
+        });
+
+        ispitCb.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updatePrijaviButtonState();
+        });
     }
 
-    @FXML
-    private void handleProveriStudenta() {
-        Long id = Long.parseLong(indeksTf.getText());
+    private void updatePrijaviButtonState() {
+        boolean studentSelected = studentCb.getValue() != null;
+        boolean ispitSelected = ispitCb.getValue() != null;
+        prijaviBtn.setDisable(!studentSelected || !ispitSelected);
+    }
 
-        prijavaIspitService.getStudentByIndeks(id)
+    private void loadStudenti() {
+        studentService.fetchAllStudentsAsync()
+                .collectList()
                 .subscribe(
-                        student -> Platform.runLater(() -> {
-                            this.pronadjeniStudent = student;
-
-                            studentInfoLbl.setText("Student: " + student.getIme() + " " + student.getPrezime());
-                            prijaviBtn.setDisable(false);
-                            System.out.println("Student postavljen: " + student.getId());
-                        }),
-                        err -> Platform.runLater(() -> {
-                            this.pronadjeniStudent = null;
-                            stringUtils.prikaziPoruku("Greška", "Student nije pronađen", Alert.AlertType.ERROR);
-                        })
+                        lista -> Platform.runLater(() -> studentCb.setItems(FXCollections.observableArrayList(lista))),
+                        err -> Platform.runLater(() -> System.err.println("Greška pri učitavanju studenata: " + err.getMessage()))
                 );
     }
 
     @FXML
     private void handlePrijaviIspit() {
+        StudentDto selectedStudent = studentCb.getValue();
         IspitPrikazDto selektovaniIspit = ispitCb.getValue();
 
-        if (pronadjeniStudent == null || selektovaniIspit == null) {
+        if (selectedStudent == null || selektovaniIspit == null) {
             stringUtils.prikaziPoruku("Greška", "Niste izabrali studenta ili ispit!", Alert.AlertType.WARNING);
             return;
         }
 
         try {
-            Long indeksId = prijavaIspitService.fetchIndeksId(pronadjeniStudent.getId()).block();
+            Long indeksId = prijavaIspitService.fetchIndeksId(selectedStudent.getId()).block();
 
             prijavaIspitService.prijaviIspit(selektovaniIspit.getId(), indeksId)
                     .subscribe(
@@ -124,6 +125,15 @@ public class PrijavaIspitController {
     }
 
     private void initConverters() {
+        studentCb.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(StudentDto student) {
+                return student == null ? "" : student.getIme() + " " + student.getPrezime() + " (" + student.getId() + ")";
+            }
+            @Override
+            public StudentDto fromString(String s) { return null; }
+        });
+
         rokCb.setConverter(new StringConverter<>() {
             @Override
             public String toString(IspitniRokDto rok) {
@@ -144,9 +154,8 @@ public class PrijavaIspitController {
     }
 
     private void resetForme() {
-        indeksTf.clear();
-        studentInfoLbl.setText("");
-        pronadjeniStudent = null;
+        studentCb.getSelectionModel().clearSelection();
+        ispitCb.getSelectionModel().clearSelection();
         prijaviBtn.setDisable(true);
     }
 }

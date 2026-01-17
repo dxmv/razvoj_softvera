@@ -19,12 +19,9 @@
             <Label text="Prijava ispita" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Indeks (ID):"/>
-                <TextField fx:id="indeksTf"/>
-                <Button fx:id="proveriBtn" text="Proveri" onAction="#handleProveriStudenta"/>
+                <Label text="Student:"/>
+                <ComboBox fx:id="studentCb" prefWidth="350" promptText="Izaberite studenta"/>
             </HBox>
-
-            <Label fx:id="studentInfoLbl" text="" style="-fx-text-fill: blue; -fx-font-weight: bold;"/>
 
             <Separator/>
 
