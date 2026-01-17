@@ -20,9 +20,7 @@
             <Menu text="Studenti">
                 <items>
                     <MenuItem onAction="#openSearchStudent" text="Pretraži" />   
-                    <MenuItem onAction="#openNewStudent" text="Novi" />
-                    <MenuItem text="Grupe" />
-                </items>                           
+                </items>
             </Menu>
             <Menu text="Nastavnici">
                 <items>

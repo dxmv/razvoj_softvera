@@ -22,13 +22,6 @@
 	<title>
 		<band height="120" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="10" width="555" height="30" uuid="1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/>
-				<textElement textAlignment="Center">
-					<font size="20" isBold="true"/>
-				</textElement>
-				<text><![CDATA[UNIVERZITET U BEOGRADU]]></text>
-			</staticText>
-			<staticText>
 				<reportElement x="0" y="40" width="555" height="25" uuid="2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e"/>
 				<textElement textAlignment="Center">
 					<font size="16" isBold="true"/>

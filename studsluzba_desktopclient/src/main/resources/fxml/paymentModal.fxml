@@ -28,9 +28,7 @@
         <Label text="Datum uplate:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
         <DatePicker fx:id="datumUplateDp" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
     </GridPane>
-    
-    <Label text="Napomena: Uplata će biti evidentirana po tekućem kursu EUR." 
-           style="-fx-font-style: italic; -fx-text-fill: gray;"/>
+
     
     <HBox spacing="15" alignment="CENTER">
         <Button text="Evidentiraj uplatu" onAction="#handlePayment" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 16;"/>
