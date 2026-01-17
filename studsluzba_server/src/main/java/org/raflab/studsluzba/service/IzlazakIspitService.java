@@ -3,6 +3,7 @@ package org.raflab.studsluzba.service;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.mapper.EntityMapper;
 import org.raflab.studsluzba.model.*;
+import org.raflab.studsluzba.model.dto.IspitniRezultatDto;
 import org.raflab.studsluzba.model.dto.IzlazakIspitDto;
 import org.raflab.studsluzba.repositories.*;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +88,33 @@ public class IzlazakIspitService {
 
         return EntityMapper.toDto(savedIzlazak);
     }
+    public List<IspitniRezultatDto> getSortiraniRezultati(Long ispitId) {
+        return repository.findRezultatiByIspitSorted(ispitId).stream()
+                .map(iz -> {
+                    Indeks ind = iz.getPrijavaIspita().getStudentskiIndeks();
+                    Student s = ind.getStudent();
 
+                    return IspitniRezultatDto.builder()
+                            .student(s.getIme() + " " + s.getPrezime())
+                            .indeks(ind.getStudijskiProgram().getOznaka() + " " + ind.getBrojIndeksa() + "/" + ind.getGodinaUpisa())
+                            .studProgram(ind.getStudijskiProgram().getOznaka())
+                            .poeniIspit(iz.getPoeniSaIspita())
+                            .poeniPredispitni(iz.getUkupnoPoena() - iz.getPoeniSaIspita())
+                            .ukupno(iz.getUkupnoPoena())
+                            .ocena(izracunajOcenu(iz.getUkupnoPoena()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private int izracunajOcenu(Double poeni) {
+        if (poeni == null || poeni < 51) return 5;
+        if (poeni < 61) return 6;
+        if (poeni < 71) return 7;
+        if (poeni < 81) return 8;
+        if (poeni < 91) return 9;
+        return 10;
+    }
     private void sacuvajPolozeniPredmet(Indeks indeks, Predmet predmet, Double ukupnoPoena, IzlazakIspit izlazak) {
         Integer ocena = generisiOcenu(ukupnoPoena);
 

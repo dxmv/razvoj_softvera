@@ -16,4 +16,7 @@ public interface StudentskiIndeksRepository extends JpaRepository<Indeks, Long> 
     Optional<Indeks> findFirstByStudentIdAndStatusOrderByDatumAktivacijeDesc(Long studentId, StatusIndeksa status);
 
     Optional<Indeks> findFirstByStudentIdOrderByDatumAktivacijeDesc(Long studentId);
+
+        Indeks findByStudentIdAndStatus(Long studentId, StatusIndeksa status);
+
 }

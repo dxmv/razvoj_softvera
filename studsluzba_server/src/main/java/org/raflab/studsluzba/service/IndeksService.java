@@ -38,6 +38,16 @@ public class IndeksService {
         repository.deleteById(id);
     }
 
+    public Long getAktivniIndeksIdZaStudenta(Long studentId) {
+        Indeks indeks = repository.findByStudentIdAndStatus(studentId, StatusIndeksa.AKTIVAN);
+
+        if (indeks == null) {
+            throw new RuntimeException("Student nema aktivan indeks!");
+        }
+
+        return indeks.getId();
+    }
+
     public Indeks findByShort(String indeks) {
         String[] arr = ParseUtils.parseIndeks(indeks);
         if (arr == null || arr.length != 3 || arr[0].isBlank() || arr[1].isBlank() || arr[2].isBlank()) {

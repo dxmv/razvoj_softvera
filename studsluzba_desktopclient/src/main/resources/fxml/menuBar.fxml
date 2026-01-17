@@ -30,19 +30,20 @@
             </Menu>
             <Menu text="Predmeti">
                 <items>
-                	<MenuItem text="Studijski programi" />                                   
-                    <MenuItem text="Predmeti" />                  
+<!--                    <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami" />-->
+                    <MenuItem text="Predmeti" onAction="#openPredmetiPoProgramu"/>
                 </items>                          
             </Menu>
             <Menu text="Nastava i ispiti">
                 <items>
                 	<MenuItem text="Raspodela nastave"  />
                 	<MenuItem text="Raspodela nastave - studenti"  />
-                	<MenuItem text="Ispitni rokovi" />
-                    <MenuItem text="Ispiti - unos" />
-                    <MenuItem text="Ispiti - prijave" />
-                    <MenuItem text="Ispiti - rezultati" />
-                </items>                          
+                	<MenuItem text="Unos ispitnog roka" onAction="#openIspitniRokUnos" />
+                	<MenuItem text="Rezultati Ispita" onAction="#openRezultatiIspita" />
+                    <MenuItem text="Ispiti - unos" onAction="#openIspitUnos"/>
+                    <MenuItem text="Ispiti - prijave" onAction="#openPrijavaIspita" />
+                    <MenuItem text="Ispiti - rezultati" onAction="#openPregledIspita"/>
+                </items>
             </Menu>
             <Menu text="Administracija">
                 <items>

@@ -37,6 +37,16 @@ public class MenuBarController {
 		mainView.navigateTo("reports");
 	}
 
+	public void openStudijskiProgrami() {mainView.navigateTo("studProgrami");}
+
+	public void openPredmetiPoProgramu() {mainView.navigateTo("predmeti");}
+	public void openIspitUnos() {mainView.navigateTo("ispitUnos");}
+	public void openPregledIspita() {mainView.navigateTo("pregledIspita");}
+	public void openPrijavaIspita() {mainView.navigateTo("prijavaIspita");}
+	public void openIspitniRokUnos() {mainView.navigateTo("ispitniRokUnos");}
+	public void openRezultatiIspita() {mainView.navigateTo("rezultatiIspita");}
+
+
 	@FXML
     public void initialize() {		
 

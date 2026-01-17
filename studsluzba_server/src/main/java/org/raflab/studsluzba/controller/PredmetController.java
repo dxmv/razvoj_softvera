@@ -64,5 +64,9 @@ public class PredmetController {
                                   @RequestParam int yearTo) {
         return service.getAverageGradeForSubjectInYearRange(id, yearFrom, yearTo);
     }
-
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    public List<PredmetDto> getAllPredmetiList() {
+        return service.getAllPredmetiAsList();
+    }
 }

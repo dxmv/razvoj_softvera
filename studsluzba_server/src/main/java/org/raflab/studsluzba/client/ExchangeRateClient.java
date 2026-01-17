@@ -1,5 +1,6 @@
 package org.raflab.studsluzba.client;
 
+
 import org.raflab.studsluzba.model.dto.ExchangeRateDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

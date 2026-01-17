@@ -7,6 +7,7 @@ import org.raflab.studsluzba.model.IspitniRok;
 import org.raflab.studsluzba.model.PrijavaIspita;
 import org.raflab.studsluzba.model.StudentPredmet;
 import org.raflab.studsluzba.model.dto.PrijavaIspitaDto;
+import org.raflab.studsluzba.model.dto.PrijavaIspitaPrikazDto;
 import org.raflab.studsluzba.model.dto.StudentDto;
 import org.raflab.studsluzba.repositories.IspitRepository;
 import org.raflab.studsluzba.repositories.PrijavaIspitaRepository;
@@ -59,6 +60,19 @@ public class PrijavaIspitaService {
 
         return prijave.stream()
                 .map(p -> EntityMapper.toDto(p.getStudentskiIndeks().getStudent()))
+                .collect(Collectors.toList());
+    }
+    public List<PrijavaIspitaPrikazDto> findPrijavljeniZaIspit2(Long ispitId) {
+        Ispit ispit = ispitRepository.findById(ispitId).orElseThrow();
+        List<PrijavaIspita> prijave = repository.findByIspit(ispit);
+
+        return prijave.stream()
+                .map(p -> PrijavaIspitaPrikazDto.builder()
+                        .indeksPrikaz(p.getStudentskiIndeks().getBrojIndeksa() + "/" + p.getStudentskiIndeks().getGodinaUpisa())
+                        .ime(p.getStudentskiIndeks().getStudent().getIme())
+                        .prezime(p.getStudentskiIndeks().getStudent().getPrezime())
+                        .datumPrijave(p.getDatumPrijave().toLocalDate())
+                        .build())
                 .collect(Collectors.toList());
     }
     @Transactional
