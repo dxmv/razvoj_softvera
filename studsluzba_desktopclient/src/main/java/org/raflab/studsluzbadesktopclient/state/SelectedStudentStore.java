@@ -6,8 +6,7 @@ import org.raflab.studsluzba.model.dto.StudentDto;
 import org.springframework.stereotype.Component;
 
 /**
- * Keeps the currently selected student so multiple views (search, profile, etc.)
- * can exchange context without tightly coupling controllers.
+ * Cuva trenutno izabranog studenta kako bi se moglo komunicirati između različitih view-ova bez čvrstog spajanja.
  */
 @Component
 public class SelectedStudentStore {

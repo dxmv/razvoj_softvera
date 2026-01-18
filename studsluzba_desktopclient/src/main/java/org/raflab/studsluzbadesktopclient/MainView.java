@@ -34,8 +34,8 @@ public class MainView {
 
     private static final String DEFAULT_VIEW = "searchStudent";
 
-    private static final long TOUCH_GESTURE_COOLDOWN_NANOS = 350_000_000L; // ~350ms
-    private static final double MIN_HORIZONTAL_SCROLL_DELTA = 35;
+    private static final long TOUCH_GESTURE_COOLDOWN_NANOS = 350_000_000L; // ~350ms cooldown za touch gesture
+    private static final double MIN_HORIZONTAL_SCROLL_DELTA = 35; // minimalna vrednost za horizontalno kretanje
 
     private final ContextFXMLLoader appFXMLLoader;
     private final NavigationService navigationService;
@@ -91,9 +91,7 @@ public class MainView {
                 new KeyCodeCombination(KeyCode.CLOSE_BRACKET, KeyCombination.CONTROL_DOWN),
                 navigationService::forward);
 
-        // Touch screen swipe events (direct touch only)
         targetScene.addEventFilter(SwipeEvent.ANY, event -> {
-            // Swipe right = back (like browser), swipe left = forward
             boolean requestBack = event.getEventType() == SwipeEvent.SWIPE_RIGHT;
             boolean requestForward = event.getEventType() == SwipeEvent.SWIPE_LEFT;
             if (!requestBack && !requestForward) {
@@ -109,13 +107,10 @@ public class MainView {
             }
         });
 
-        // Trackpad two-finger horizontal scroll/swipe gesture
         targetScene.addEventFilter(ScrollEvent.SCROLL, event -> {
-            // Only handle horizontal scroll that's primarily horizontal (not vertical scrolling)
             double absX = Math.abs(event.getDeltaX());
             double absY = Math.abs(event.getDeltaY());
             
-            // Require significant horizontal movement and it must be more horizontal than vertical
             if (absX < MIN_HORIZONTAL_SCROLL_DELTA || absX < absY * 1.5) {
                 return;
             }
@@ -124,8 +119,6 @@ public class MainView {
                 return;
             }
             
-            // Positive deltaX = swiping right (fingers move right) = go back
-            // Negative deltaX = swiping left (fingers move left) = go forward
             boolean handled = event.getDeltaX() > 0 ? navigationService.back() : navigationService.forward();
             if (handled) {
                 event.consume();

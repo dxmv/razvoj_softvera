@@ -199,7 +199,6 @@ public class StudentApiClient {
                 .bodyToFlux(StudentDto.class);
     }
 
-    // ==================== SYNC METHODS (RestTemplate - blocking) ====================
 
     /**
      * Search student by name synchronously (blocking).

@@ -377,7 +377,7 @@ public class StudentProfileController {
                         return;
                     }
 
-                    // Calculate GPA from grades
+                    // na osnu polozenih prosek
                     double gpa = passedExamsList.stream()
                             .map(PolozenPredmetDto::getOcena)
                             .filter(Objects::nonNull)
@@ -387,7 +387,7 @@ public class StudentProfileController {
 
                     int passedCount = passedExamsList.size();
 
-                    // Collect predmet IDs to fetch ESPB
+                    // na osnovu polozenih espb
                     List<Long> predmetIds = passedExamsList.stream()
                             .map(PolozenPredmetDto::getPredmetId)
                             .filter(Objects::nonNull)
@@ -402,7 +402,7 @@ public class StudentProfileController {
                         return;
                     }
 
-                    // Fetch predmet details to get ESPB
+
                     predmetService.findPredmetsByIds(predmetIds)
                             .collectList()
                             .subscribe(predmeti -> {
@@ -414,7 +414,7 @@ public class StudentProfileController {
                                         .filter(p -> p.getEspbBodovi() != null)
                                         .collect(Collectors.toMap(PredmetDto::getId, PredmetDto::getEspbBodovi));
 
-                                // Sum ESPB for all passed exams
+                                // suma espb
                                 int totalEspb = passedExamsList.stream()
                                         .map(PolozenPredmetDto::getPredmetId)
                                         .filter(Objects::nonNull)
@@ -432,7 +432,6 @@ public class StudentProfileController {
                                     return;
                                 }
                                 showMessage(statsMessageLabel, "Greška pri učitavanju ESPB podataka: " + error.getMessage());
-                                // Still show GPA and count even if ESPB fetch failed
                                 updateStatisticsLabels(0, gpa, passedCount);
                             }));
                 }, error -> runOnFx(() -> {
@@ -681,7 +680,7 @@ public class StudentProfileController {
                             .distinct()
                             .collect(Collectors.toList());
 
-                    // Fetch predmet details
+                    // detalji
                     predmetService.findPredmetsByIds(predmetIds)
                             .collectList()
                             .subscribe(predmeti -> {
